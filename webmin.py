@@ -719,32 +719,35 @@ def read_file_cached(file):
 #return @pids;
 #}
 #
-## error([message]+)
-## Display an error message and exit. The variable $whatfailed must be set
-## to the name of the operation that failed.
-#sub error
-#{
-#&load_theme_library();
-#if (!$ENV{'REQUEST_METHOD'}) {
-#        # Show text-only error
-#        print STDERR "$text{'error'}\n";
-#        print STDERR "-----\n";
-#        print STDERR ($main::whatfailed ? "$main::whatfailed : " : ""),@_,"\n";
-#        print STDERR "-----\n";
-#        }
-#elsif (defined(&theme_error)) {
-#        &theme_error(@_);
-#        }
-#else {
-#        &header($text{'error'}, "");
-#        print "<hr>\n";
-#        print "<h3>",($main::whatfailed ? "$main::whatfailed : " : ""),@_,"</h3>\n";
-#        print "<hr>\n";
-#        &footer();
-#        }
-#exit;
-#}
-#
+
+def error(*message):
+    """Display an error message and exit. The global variable whatfailed
+    must be set to the name of the operation that failed."""
+    # FIXME
+    #load_theme_library()
+    if not os.environ.has_key("REQUEST_METHOD"):
+        # Show text-only error
+        print >> sys.stderr, text["error"]
+        print >> sys.stderr, "-----"
+        if whatfailed:
+            print >> sys.stderr, whatfailed, " : "
+        else:
+            for msg in message:
+                print >> sys.stderr, msg
+        print >> sys.stderr, "-----"
+    # FIXME
+    #elif (defined(&theme_error))
+    else:
+        header(text['error'], "");
+        print "<hr>"
+        if whatfailed:
+            print >> sys.stderr, whatfailed, " : "
+        else:
+            for msg in message:
+                print >> sys.stderr, msg
+        print "<hr>"
+        footer()
+
 ## error_setup(message)
 ## Register a message to be prepended to all error strings
 #sub error_setup
