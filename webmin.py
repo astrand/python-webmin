@@ -93,7 +93,7 @@ webmin_module = globals()
 current_theme = None
 
 #
-# Perl compat functions
+# Perl compatibility functions
 #
 def die(msg):
     print >> sys.stderr, msg
@@ -103,15 +103,19 @@ def die(msg):
 # Configuration and spool directories
 try:
     config_directory = os.environ["WEBMIN_CONFIG"]
-except KeyError: die("WEBMIN_CONFIG not set")
+except KeyError:
+    die("WEBMIN_CONFIG not set")
+
 try:
     var_directory = os.environ["WEBMIN_VAR"]
-except KeyError: die("WEBMIN_VAR not set")
+except KeyError:
+    die("WEBMIN_VAR not set")
 
 try:
     session_id = os.environ["SESSION_ID"]
     del os.environ["SESSION_ID"]
-except KeyError: pass
+except KeyError:
+    pass
 
 
 def read_file(file, dict=None):
@@ -131,7 +135,9 @@ def read_file(file, dict=None):
     for line in f:
         # Get rid of \n
         line = line.rstrip()
-        if not line: continue
+        if not line:
+            continue
+
         try:
             (name, value) = line.split("=")
         except ValueError:
@@ -139,7 +145,6 @@ def read_file(file, dict=None):
         name = name.strip()
         value = value.strip()
         dict[name] = value
-
 
     return dict
 
