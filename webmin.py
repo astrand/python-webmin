@@ -34,70 +34,81 @@ import cgi
 
 #
 # Global variables
+#
 # Make sure to define these as global in funtions, if you want to change them. 
 #
 # main:: variables
-session_id = None
-read_file_cache = None
-tempfilecount = 0
+session_id         = None
+read_file_cache    = None
+tempfilecount      = 0
 done_webmin_header = 0
-whatfailed = None
+whatfailed         = None
+
 # A dictionary with lists, like: {"john": ["webmin", "bsdexports"]}
-acl_array_cache = {}
-# Note: I cannot understand what acl_hash_cache is good for in web-lib.py. Therefore,
+acl_array_cache    = {}
+
+# NOTE: I cannot understand what acl_hash_cache is good for in webmin.py. Therefore,
 # I'm not using it at all. 
 done_foreign_require = None
-foreign_args = None
-no_acl_check = None
-no_referers_check = None
-locked_file_list = None
-locked_file_data = None
-locked_file_type = None
-locked_file_diff = None
-action_id_count = None
-done_seed_random = None
+foreign_args         = None
+no_acl_check         = None
+no_referers_check    = None
+locked_file_list     = None
+locked_file_data     = None
+locked_file_type     = None
+locked_file_diff     = None
+action_id_count      = None
+done_seed_random     = None
 
-# Misc
-text = {}
-tconfig = {} 
-config = {}
-gconfig = {}
-module_name = None
-module_config_directory = None
-# In web-lib.pl, tb is either "" or "bgcolor=#something". I think this
-# is ugly and it makes it hard to use HTMLgen. In webmin.py, tb is
-# either None or the color string like "#9999ff". Same goes for cb. 
-tb = None
-cb = None
-scriptname = None
-remote_user = None
-base_remote_user = None
-root_directory = None
-module_root_directory = None
-module_categories = {}
-current_lang = "en"
-default_lang = "en"
-list_languages_cache = []
-force_charset = None
-user_module_config_directory = None
-pragma_no_cache = None
-loaded_theme_library = None
-module_info = None
-indata = None
-webmin_module = globals()
+# Miscellaneous
+text                     = {}
+tconfig                  = {} 
+config                   = {}
+gconfig                  = {}
+module_name              = None
+module_config_directory  = None
 
+# In web-lib.pl, tb is either "" or "bgcolor=#something".  I think this
+# is ugly and it makes it hard to use HTMLgen.  In webmin.py, tb is
+# either None or the color string like "#9999ff".  Same goes for cb. 
+tb  = None
+cb  = None
+
+scriptname                    = None
+remote_user                   = None
+base_remote_user              = None
+root_directory                = None
+module_root_directory         = None
+module_categories             = {}
+current_lang                  = "en"
+default_lang                  = "en"
+list_languages_cache          = []
+force_charset                 = None
+user_module_config_directory  = None
+pragma_no_cache               = None
+loaded_theme_library          = None
+module_info                   = None
+indata                        = None
+webmin_module                 = globals()
+
+
+# ----------------------------------------------------------------
+#                             Themes
 #
-# Themes
-#
+
+
 # A string with the current theme name
 current_theme = None
 
+# ----------------------------------------------------------------
+#                 Perl compatibility functions
 #
-# Perl compatibility functions
-#
+
+
 def die(msg):
     print >> sys.stderr, msg
     sys.exit(1)
+
 
 
 # Configuration and spool directories
@@ -600,8 +611,8 @@ def header(title, image=None, help=None, config=None, nomodule=None, nowebmin=No
     print "</td>"
 
     title.replace("&auml", "ä")
-    title.replace("&auml", "ä")
     title.replace("&ouml", "ö")
+    title.replace("&aring", "å")
     title.replace("&uuml", "ü")
     title.replace("&nbsp;", " ")
 
@@ -2955,40 +2966,36 @@ def close_http_connection():
 #close($h->{'fh'});
 #}
 #
-## clean_environment()
+
+UNCLEAN_ENV = os.environ.copy()
+
 def clean_environment():
-    raise NotImplementedError
-## Deletes any environment variables inherited from miniserv so that they
-## won't be passed to programs started by webmin.
-#sub clean_environment
-#{
-#%UNCLEAN_ENV = %ENV;
-#foreach $k (keys %ENV) {
-#        if ($k =~ /^HTTP_/) {
-#                delete($ENV{$k});
-#                }
-#        }
-#foreach $e ('WEBMIN_CONFIG', 'SERVER_NAME', 'CONTENT_TYPE', 'REQUEST_URI',
-#            'PATH_INFO', 'WEBMIN_VAR', 'REQUEST_METHOD', 'GATEWAY_INTERFACE',
-#            'QUERY_STRING', 'REMOTE_USER', 'SERVER_SOFTWARE', 'SERVER_PROTOCOL',
-#            'REMOTE_HOST', 'SERVER_PORT', 'DOCUMENT_ROOT', 'SERVER_ROOT',
-#            'MINISERV_CONFIG', 'SCRIPT_NAME', 'SERVER_ADMIN', 'CONTENT_LENGTH',
-#            'HTTPS') {
-#        delete($ENV{$e});
-#        }
-#}
-#
+    """Deletes any environment variables inherited from miniserv so that they
+    won't be passed to programs started by webmin."""
+    
+    for key in os.environ.keys():
+        if key[0:5] == "HTTP_":
+            del os.environ[key]
+
+    for key in ['WEBMIN_CONFIG', 'SERVER_NAME', 'CONTENT_TYPE', 'REQUEST_URI',
+                'PATH_INFO', 'WEBMIN_VAR', 'REQUEST_METHOD', 'GATEWAY_INTERFACE',
+                'QUERY_STRING', 'REMOTE_USER', 'SERVER_SOFTWARE', 'SERVER_PROTOCOL',
+                'REMOTE_HOST', 'SERVER_PORT', 'DOCUMENT_ROOT', 'SERVER_ROOT',
+                'MINISERV_CONFIG', 'SCRIPT_NAME', 'SERVER_ADMIN', 'CONTENT_LENGTH',
+                'HTTPS']:
+        if (os.environ.has_key(key)):
+            del os.environ[key]
+
+
 ## reset_environment()
 def reset_environment():
-    raise NotImplementedError
-## Puts the environment back how it was before &clean_environment
-#sub reset_environment
-#{
-#%ENV = %UNCLEAN_ENV;
-#}
-#
-#$webmin_feedback_address = "feedback\@webmin.com";
-#
+    """Puts the environment back how it was before clean_environment()"""
+    
+    os.environ = UNCLEAN_ENV.copy()
+
+
+webmin_feedback_address = "feedback\@webmin.com"
+
 ## progress_callback()
 ## Never called directly, but useful for passing to &http_download
 #sub progress_callback
