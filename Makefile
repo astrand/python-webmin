@@ -1,6 +1,7 @@
 VERSION=0.2pre
 ROOTDIR=/
 WEBMINDIR=$(ROOTDIR)/usr/libexec/webmin
+USERMINDIR=$(ROOTDIR)/usr/libexec/usermin
 
 .PHONY: dist rpm
 
@@ -13,6 +14,15 @@ install:
 # FIXME: Compile 
 	install webmin.py $(WEBMINDIR)
 	install themes/mscstyle3/theme.py $(WEBMINDIR)/mscstyle3/
+
+install-usermin:
+# API module
+	mkdir -p $(USERMINDIR)
+	mkdir -p $(USERMINDIR)/mscstyle3
+# FIXME: Compile 
+	install webmin.py $(USERMINDIR)
+	install themes/mscstyle3/theme.py $(USERMINDIR)/mscstyle3/
+
 
 install-examples:
 # Python example module
