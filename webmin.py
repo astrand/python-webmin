@@ -649,11 +649,10 @@ def header(title, image=None, help=None, config=None, nomodule=None, nowebmin=No
                 print "<img src='%s/images/letters/%d.%s.gif' alt='%s' align=bottom>" % \
                       (gconfig.get("webprefix", ""), charnum, lang["charset"], char)
             elif char == "":
-                print "<img src='%s/images/letters/%d.gif alt='&nbsp;' align=bottom>" % \
+                print "<img src='%s/images/letters/%d.gif' alt='&nbsp;' align=bottom>" % \
                       (gconfig.get("webprefix", ""), charnum)
             else:
-                print "XXXXXXXXXXXXXXX"
-                print "<img src='%s/images/letters/%d.gif alt='%s' align=bottom>" % \
+                print "<img src='%s/images/letters/%d.gif' alt='%s' align=bottom>" % \
                       (gconfig.get("webprefix", ""), charnum, char)
         if below:
             print "<br>", below
@@ -696,7 +695,7 @@ def footer(links=[], noendbody=None):
                 url = gconfig.get("webprefix", "") + url
             if i == 0:
                 print "<a href='%s'><img alg='<-' align=middle border=0 "\
-                      "src=%s/images/left.gif></a>" % (url, gconfig.get("webprefix", ""))
+                      "src='%s/images/left.gif'></a>" % (url, gconfig.get("webprefix", ""))
             else:
                 print "&nbsp;|"
             print "&nbsp;<a href='%s'> %s</a>" % (url, textsub("main_return", name))
