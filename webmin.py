@@ -39,9 +39,10 @@ read_file_cache = None
 tempfilecount = 0
 done_webmin_header = 0
 whatfailed = None
-# A dictionary of dictionaries, like: {"john": {"webmin": 1, "bsdexports": 1}}
-acl_hash_cache = {}
+# A dictionary with lists, like: {"john": ["webmin", "bsdexports"]}
 acl_array_cache = {}
+# Note: I cannot understand what acl_hash_cache is good for in web-lib.py. Therefore,
+# I'm not using it at all. 
 done_foreign_require = None
 foreign_args = None
 no_acl_check = None
@@ -467,7 +468,7 @@ def _PrintHeader(charset=None):
 ##	 [header], [body], [below])
 
 
-def header(title, image, help=None, config=None, nomodule=None, nowebmin=None,
+def header(title, image=None, help=None, config=None, nomodule=None, nowebmin=None,
            rightside="", header=None, body=None, below=None):
     """Output a page header with some title and image. The header may also
     include a link to help, and a link to the config page.
@@ -590,81 +591,80 @@ def header(title, image, help=None, config=None, nomodule=None, nowebmin=None,
         print "<tt>%s</tt>%s logged into %s %s on <tt>%s</tt> (%s %s)</td>" % \
               (remote_user, userstring, text["programname"], version, os_type, os_version)
         print "</tr> <tr>\n";
-        print "<td width=15% valign=top align=left>"
-        if os.environ.has_key("HTTP_WEBMIN_SERVERS"):
-                print "<a href='%s'>" % os.environ["HTTP_WEBMIN_SERVERS"]
-                print "%s</a><br>" % text["header_servers"]
 
-        if not nowebmin and not tconfig.has_key("noindex"):
-            (dummy, acl) = read_acl()
-            mc = acl.has_key(base_remote_user)
-            # FIXME: I dont understand the code below. To me, it looks like we are comparing
-            # a list of strings with the constant 1. This makes no sense to me. 
-            # local $mc = @{$acl{$base_remote_user}} == 1;
-            mc = 0
-            if gconfig.get("gotoone") and session_id and mc == 1:
-                print "<a href='%s/session_login.cgi?logout=1'> %s</a><br>" % \
-                      (gconfig["webprefix"], text["main_logout"])
-            elif gconfig.get("gotoone") and mc == 1:
-                print "<a href='%s/switch_user.cgi'> %s</a><br>" % \
-                      (gconfig["webprefix"], text["main_switch"])
-            else:
-                print "<a href='%s/?cat=%s'> %s </a><br>" % \
-                      (gconfig["webprefix"], text["header_webmin"])
+    print "<td width=15% valign=top align=left>"
+    if os.environ.has_key("HTTP_WEBMIN_SERVERS"):
+        print "<a href='%s'>" % os.environ["HTTP_WEBMIN_SERVERS"]
+        print "%s</a><br>" % text["header_servers"]
 
-        if not nomodule:
-            print "<a href='%s/%s'> %s </a><br>" % \
-                  (gconfig["webprefix"], module_name, text["header_module"])
-
-        if type(help) == types.ListType:
-            print hlink(text["header_help"], help[0], help[1]), "<br>"
-        elif help:
-            print hlink(text["header_help"], help), "<br>\n"
-
-        if config:
-            access = get_module_acl();
-            if not access.get("noconfig"):
-                if user_module_config_directory:
-                    cprog = "uconfig.cgi"
-                else:
-                    cprog = "config.cgi"
-
-                print "<a href='%s/%s?%s'> %s </a><br>" % \
-                      (gconfig["webprefix"], cprog, module_name, text["header_config"])
-        print "</td>"
-
-        title.replace("&auml", "ä")
-        title.replace("&auml", "ä")
-        title.replace("&ouml", "ö")
-        title.replace("&uuml", "ü")
-        title.replace("&nbsp;", " ")
-
-        if image:
-            print "<td align=center width=70%> <img alt='%s' src='%s'></td>" % \
-                  (image, image)
-        elif lang["titles"] and not gconfig.get("texttitles") and not tconfig.get("texttitles"):
-            print "<td align=center width=70%>"
-            for char in title:
-                charnum = chr(char)
-                if charnum > 127 and lang.get("charset"):
-                    print "<img src='%s/images/letters/%d.%s.gif' alt='%s' align=bottom>" % \
-                          (gconfig["webprefix"], charnum, lang["charset"], char)
-                elif char == "":
-                    print "<img src='%s/images/letters/%d.gif alt='&nbsp;' align=bottom>" % \
-                          (gconfig["webprefix"], charnum)
-                else:
-                    print "<img src='%s/images/letters/%d.gif alt='%s' align=bottom>" % \
-                          (gconfig["webprefix"], charnum, char)
-            if below:
-                print "<br>", below
-
-            print "</td>"
+    if not nowebmin and not tconfig.has_key("noindex"):
+        acl = read_acl()
+        mc = acl.has_key(base_remote_user)
+        if gconfig.get("gotoone") and session_id and mc == 1:
+            print "<a href='%s/session_login.cgi?logout=1'> %s</a><br>" % \
+                  (gconfig.get("webprefix", ""), text["main_logout"])
+        elif gconfig.get("gotoone") and mc == 1:
+            print "<a href='%s/switch_user.cgi'> %s</a><br>" % \
+                  (gconfig.get("webprefix", ""), text["main_switch"])
         else:
-            print "<td align=center width=70%><h1>%s</h1></td>" % title
+            print "<a href='%s/?cat=%s'> %s </a><br>" % \
+                  (gconfig.get("webprefix", ""), text["header_webmin"])
 
-        print "<td width=15% valign=top align=right>"
-        print rightside
-        print "</td></tr></table>"
+    if not nomodule:
+        print "<a href='%s/%s'> %s </a><br>" % \
+              (gconfig.get("webprefix", ""), module_name, text["header_module"])
+
+    if type(help) == types.ListType:
+        print hlink(text["header_help"], help[0], help[1]), "<br>"
+    elif help:
+        print hlink(text["header_help"], help), "<br>\n"
+
+    if config:
+        access = get_module_acl();
+        if not access.get("noconfig"):
+            if user_module_config_directory:
+                cprog = "uconfig.cgi"
+            else:
+                cprog = "config.cgi"
+
+            print "<a href='%s/%s?%s'> %s </a><br>" % \
+                  (gconfig.get("webprefix", ""), cprog, module_name, text["header_config"])
+            
+    print "</td>"
+
+    title.replace("&auml", "ä")
+    title.replace("&auml", "ä")
+    title.replace("&ouml", "ö")
+    title.replace("&uuml", "ü")
+    title.replace("&nbsp;", " ")
+
+    if image:
+        print "<td align=center width=70%> <img alt='%s' src='%s'></td>" % \
+              (image, image)
+    elif lang["titles"] and not gconfig.get("texttitles") and not tconfig.get("texttitles"):
+        print "<td align=center width=70%>"
+        for char in title:
+            charnum = ord(char)
+            if charnum > 127 and lang.get("charset"):
+                print "<img src='%s/images/letters/%d.%s.gif' alt='%s' align=bottom>" % \
+                      (gconfig.get("webprefix", ""), charnum, lang["charset"], char)
+            elif char == "":
+                print "<img src='%s/images/letters/%d.gif alt='&nbsp;' align=bottom>" % \
+                      (gconfig.get("webprefix", ""), charnum)
+            else:
+                print "XXXXXXXXXXXXXXX"
+                print "<img src='%s/images/letters/%d.gif alt='%s' align=bottom>" % \
+                      (gconfig.get("webprefix", ""), charnum, char)
+        if below:
+            print "<br>", below
+
+        print "</td>"
+    else:
+        print "<td align=center width=70%><h1>%s</h1></td>" % title
+
+    print "<td width=15% valign=top align=right>"
+    print rightside
+    print "</td></tr></table>"
 
 
 
@@ -693,10 +693,10 @@ def footer(links=[], noendbody=None):
             elif url.startswith("?") and module_name:
                 url = "/%s/" + url
             if url.startswith("/"):
-                url = gconfig["webprefix"] + url
+                url = gconfig.get("webprefix", "") + url
             if i == 0:
                 print "<a href='%s'><img alg='<-' align=middle border=0 "\
-                      "src=%s/images/left.gif></a>" % (url, gconfig["webprefix"])
+                      "src=%s/images/left.gif></a>" % (url, gconfig.get("webprefix", ""))
             else:
                 print "&nbsp;|"
             print "&nbsp;<a href='%s'> %s</a>" % (url, textsub("main_return", name))
@@ -953,43 +953,26 @@ def file_chooser_button():
 
 def read_acl():
     """Reads the acl file and return dictionary"""
-    global acl_hash_cache, acl_array_cache
-    if acl_hash_cache:
-        ACL = open(acl_filename())
-        for line in ACL:
+    global acl_array_cache
+    if not acl_array_cache:
+        for line in open(_acl_filename()):
             # Get rid of \n
             line = line.rstrip()
             if not line: continue
-            match = re.search("^(\S+):\s*(n.*)", line)
+            match = re.search("^(\S+):\s*(.*)", line)
             if match:
                 user = match.group(1)
-                mods = group(2).split()
-                try:
-                    allowed_modules = acl_hash_cache[user]
-                except KeyError:
-                    acl_hash_cache[user] = allowed_modules = {}
-                
-                for mod in mods:
-                    allowed_modules[mod] = 1
-                    
-                acl_array_cache[user] = mods
+                modules = match.group(2).split()
+                acl_array_cache[user] = modules
     
-    # Available as global variables, but return them anyway...
-    return (acl_hash_cache, acl_array_cache)
-#
-## acl_filename()
-## Returns the file containing the webmin ACL
-def _acl_filename():
-    raise NotImplementedError
-#sub acl_filename
-#{
-#return "$config_directory/webmin.acl";
-#}
-#
+    # Available as global variables, but return anyway...
+    return acl_array_cache
 
-# Does nothing, but kept around for compatability
-def acl_check():
-    pass
+
+def _acl_filename():
+    """Returns the file containing the webmin ACL"""
+    return os.path.join(config_directory, "webmin.acl");
+
 
 ## get_miniserv_config(&array)
 def _get_miniserv_config():
@@ -1602,7 +1585,7 @@ def init_config():
     elif os.environ.has_key("SCRIPT_NAME"):
         sn = os.environ["SCRIPT_NAME"]
         if gconfig.has_key("webprefix"):
-            sn = sn.replace(gconfig["webprefix"], "")
+            sn = sn.replace(gconfig.get("webprefix", ""), "")
         match = re.search("^\/([^\/]+)\/", sn)
         if match:
             module_name = match.group(1)
@@ -1678,10 +1661,11 @@ def init_config():
     if not text:
         error("Failed to determine Webmin root from SERVER_ROOT or SCRIPT_FILENAME")
 
+
     # Check if the HTTP user can access this module
     if (module_name and not no_acl_check and not
         os.environ.has_key("FOREIGN_MODULE_NAME")):
-        (acl, dummy) = read_acl()
+        acl = read_acl()
         risk = gconfig.get("risk_" + u)
         if risk:
             # Dummy loop, so we can break out
@@ -1696,9 +1680,9 @@ def init_config():
                 error(textsub('emodule', "<i>%s</i>" % u,
                               "<i>%s</i>" % module_info["desc"]))
         else:
-            allowed_modules = acl.get(u, {})
-            if not allowed_modules.has_key(module_name) or \
-                   not allowed_modules.has_key('*'):
+            allowed_modules = acl.get(u, [])
+            if not (module_name in allowed_modules) and \
+                   not ('*' in allowed_modules):
                 error(textsub('emodule', "<i>%s</i>" % u,
                               "<i>%s</i>" % module_info.get("desc")))
             
