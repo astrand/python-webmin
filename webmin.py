@@ -723,6 +723,10 @@ def _load_theme_library():
         filename = filename[:-3] + ".py"
 
     themefile = os.path.join(root_directory, current_theme, filename)
+    if not os.path.exists(themefile):
+        themefile = os.path.join(os.path.split(__file__)[0],
+                                 current_theme,
+                                 filename)
     try:
         execfile(themefile, webmin_module, webmin_module)
     except IOError:
@@ -1627,7 +1631,7 @@ def init_config():
     if (module_name):
         module_config_directory = os.path.join(config_directory, module_name)
         config = read_file_cached(os.path.join(module_config_directory, "config"))
-        module_info = get_module_info(module_name)
+        module_info = get_module_info(module_name, noclone=1)
         module_root_directory = os.path.join(root_directory, module_name)
 
     # Get the username
