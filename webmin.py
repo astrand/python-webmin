@@ -3049,25 +3049,27 @@ webmin_feedback_address = "feedback\@webmin.com"
 #        }
 #}
 #
-## switch_to_remote_user()
+
 def switch_to_remote_user():
-    raise NotImplementedError
-## Changes the user and group of the current process to that of the unix user
-## with the same name as the current webmin login, or fails if there is none.
-#sub switch_to_remote_user
-#{
-#@remote_user_info = getpwnam($remote_user);
-#@remote_user_info || &error(textsub('switch_remote_euser', $remote_user));
-#if ($< == 0) {
+    """Changes the user and group of the current process to that of the unix user
+    with the same name as the current webmin login, or fails if there is none.
+    """
+    global remote_user_info
+    try:
+        remote_user_info = pwd.getpwnam(remote_user)	
+    except KeyError:
+	error(" switch to user "+remote_user+" failed")
+    if os.getuid()==0 and  remote_user_info:
 #        $( = $remote_user_info[3];
 #        $) = "$remote_user_info[3] ".join(" ", $remote_user_info[3],
 #                                       &other_groups($remote_user_info[0]));
-#        ($>, $<) = ($remote_user_info[2], $remote_user_info[2]);
-#        $ENV{'USER'} = $remote_user;
-#        $ENV{'HOME'} = $remote_user_info[7];
-#        }
-#}
-#
+	# Set real and effective user and group ids
+	# in perl: ($>, $<) = ( $remote_user_info[2], $remote_user_info[2] );
+	os.setregid(remote_user_info[3],remote_user_info[3])	
+	os.setreuid(remote_user_info[2],remote_user_info[2])
+	os.environ['USER'] = remote_user
+	os.environ['LOGNAME'] = remote_user 
+	os.environ['HOME'] = remote_user_info[5]
 
 def create_user_config_dirs():
     """ Creates per-user config directories and sets $user_config_directory and
