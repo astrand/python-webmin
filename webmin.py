@@ -29,6 +29,7 @@ import sys
 import re
 import types
 import cgi
+import time
 
 #
 # Global variables
@@ -917,19 +918,12 @@ def has_command(command):
     return None
 
 
-## make_date(seconds)
-def make_date():
-    raise NotImplementedError
-## Converts a Unix date/time in seconds to a human-readable form
-#sub make_date
-#{
-#local(@tm);
-#@tm = localtime($_[0]);
-#return sprintf "%d/%s/%d %2.2d:%2.2d",
-#                $tm[3], $text{"smonth_".($tm[4]+1)},
-#                $tm[5]+1900, $tm[2], $tm[1];
-#}
-#
+def make_date(seconds):
+    """Converts a Unix date/time in seconds to a human-readable form """
+    # FIXME: Translation support. Make sure we use same format as web-lib.pl.
+    return time.ctime(seconds)
+    
+
 ## file_chooser_button(input, type, [form], [chroot])
 
 def file_chooser_button():
