@@ -13,11 +13,27 @@ import sys
 # Global variables
 # Make sure to define these as global in funtions, if you want to change them. 
 #
+# main:: variables
 session_id = None
+read_file_cache = None
+tempfilecount = 0
+done_webmin_header = 0
+whatfailed = None
+acl_hash_cache = None
+acl_array_cache = None
+done_foreign_require = None
+foreign_args = None
 no_acl_check = None
 no_referers_check = None
-tconfig = {} 
+locked_file_list = None
+locked_file_data = None
+locked_file_type = None
+locked_file_diff = None
+action_id_count = None
+done_seed_random = None
 
+# Misc
+tconfig = {} 
 config = None
 gconfig = None
 module_name = None
@@ -805,29 +821,27 @@ def read_file_cached(file):
 #return "<input type=button onClick='ifield = document.forms[$form].$_[0]; chooser = window.open(\"$gconfig{'webprefix'}/chooser.cgi?type=$_[1]&chroot=$chroot&file=\"+ifield.value, \"chooser\", \"toolbar=no,menubar=no,scrollbar=no,width=400,height=300\"); chooser.ifield = ifield' value=\"...\">\n";
 #}
 #
-## read_acl(&array, &array)
-## Reads the acl file into the given associative arrays
-#sub read_acl
-#{
-#local($user, $_, @mods);
-#if (!defined(%main::acl_hash_cache)) {
-#        open(ACL, &acl_filename());
-#        while(<ACL>) {
-#                if (/^(\S+):\s*(.*)/) {
-#                        local(@mods);
-#                        $user = $1;
-#                        @mods = split(/\s+/, $2);
-#                        foreach $m (@mods) {
-#                                $main::acl_hash_cache{$user,$m}++;
-#                                }
-#                        $main::acl_array_cache{$user} = \@mods;
-#                        }
-#                }
-#        close(ACL);
-#        }
-#if ($_[0]) { %{$_[0]} = %main::acl_hash_cache; }
-#if ($_[1]) { %{$_[1]} = %main::acl_array_cache; }
-#}
+
+def read_acl():
+    """Reads the acl file and return dictionary"""
+    global acl_hash_cache, acl_array_cache
+    if acl_hash_cache:
+        ACL = open(acl_filename())
+        for line in ACL:
+            # Get rid of \n
+            line = line.rstrip()
+            if not line: continue
+            match = re.search("^(\S+):\s*(n.*)", line)
+            if match:
+                user = match.group(1)
+                mods = group(2).split()
+                for mod in mods:
+                    acl_hash_cache[user + mod] = 1
+                acl_array_cache[user] = mods
+    
+
+    # Available as global variables, but return them anyway...
+    return (acl_hash_cache, acl_array_cache)
 #
 ## acl_filename()
 ## Returns the file containing the webmin ACL
@@ -1386,6 +1400,7 @@ def init_config():
     global config, gconfig, module_name, module_config_directory, tb, cb, \
            scriptname, remote_user, base_remote_user, current_theme, \
            root_directory, module_root_directory
+    global no_acl_check, no_referers_check
     
     # Read the webmin global config file. This contains the OS type and version,
     # OS specific configuration and global options such as proxy servers
@@ -1479,7 +1494,6 @@ def init_config():
     # Check if the HTTP user can access this module
     if (module_name and not no_acl_check and not
         os.environ.has_key("FOREIGN_MODULE_NAME")):
-        # FIXME: Implement
         (acl, dummy) = read_acl()
         risk = gconfig.get("risk_" + u)
         if risk:
@@ -1493,16 +1507,13 @@ def init_config():
                     # Found
                     break
                 error(textsub('emodule', "<i>%s</i>" % u,
-                              "<i>%s</i>" % module_info["desc"])
+                              "<i>%s</i>" % module_info["desc"]))
         else:
-            # FIXMEl
-            pass
-            #acl = 
-            #                $acl{$u,$module_name} || $acl{$u,'*'} ||
-            error(textsub('emodule', "<i>%s</i>" % u,
-                          "<i>%s</i>" % module_info["desc"])
+            if not acl.has_key(u + module_name) and \
+               not acl.has_key(u + '*'):
+                error(textsub('emodule', "<i>%s</i>" % u,
+                              "<i>%s</i>" % module_info["desc"]))
             
-        global no_acl_check
         no_acl_check = 1
 
     # Check the Referer: header for nasty redirects
@@ -1549,10 +1560,10 @@ def init_config():
 
         if (referer_site):
             print textsub('referer_warn', "<tt>%s</tt>" %
-                          os.environ.get("HTTP_REFERER"), $url), "<p>"
+                          os.environ.get("HTTP_REFERER"), url), "<p>"
             
         else:
-            print "<p>", textsub('referer_warn_unknown', $url), "<p>"
+            print "<p>", textsub('referer_warn_unknown', url), "<p>"
         print "<input type=submit value='%s'><br>" % text["referer_ok"]
         print "<input type=checkbox name=referer_again value=1> ", \
               text["referer_again"], "<p>"
@@ -1560,7 +1571,6 @@ def init_config():
         footer("/", text['index'])
         return
 
-    global no_referers_check
     no_referers_check = 1
     return 1
 
