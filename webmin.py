@@ -66,7 +66,6 @@ cb = None
 scriptname = None
 remote_user = None
 base_remote_user = None
-current_theme = None
 root_directory = None
 module_root_directory = None
 module_categories = {}
@@ -78,6 +77,15 @@ user_module_config_directory = None
 pragma_no_cache = None
 loaded_theme_library = None
 module_info = None
+
+#
+# Themes
+#
+# A string with the current theme name
+current_theme = None
+webmin_module = globals()
+
+
 
 #
 # Perl compat functions
@@ -490,10 +498,11 @@ def header(title, image=None, help=None, config=None, nomodule=None, nowebmin=No
 
     _PrintHeader(charset)
     _load_theme_library()
-    # FIXME
-    #if theme_header:
-    #    theme_header(all args...)
-    #    return
+    if webmin_module.has_key("theme_header"):
+        theme_header(title, image, help, config, nomodule, nowebmin,
+                     rightside, header, body, below)
+        return
+    
     print "<!doctype html public \"-//W3C//DTD HTML 3.2 Final//EN\">"
     print "<html>"
     if (charset):
@@ -580,11 +589,9 @@ def header(title, image=None, help=None, config=None, nomodule=None, nowebmin=No
     if tconfig.get("prebodyinclude"):
         print open(os.path.join(root_directory, current_theme, tconfig["prebodyinclude"])).read()
 
-    # FIXME
-    #if (defined(&theme_prebody)) {
-    #        &theme_prebody(@_);
-
-    #if (@_ > 1) {
+    if webmin_module.has_key("theme_prebody"):
+        theme_prebody(title, image, help, config, nomodule, nowebmin,
+                      rightside, header, body, below)
     
     print "<table width=100%><tr>"
     if gconfig.get("sysinfo") == 2 and remote_user:
@@ -678,11 +685,10 @@ def footer(links=[], noendbody=None):
     
     """
     _load_theme_library()
-    # FIXME
-    #if (defined(&theme_footer)) {
-    #        &theme_footer(@_);
-    #        return;
-    #        }
+    if webmin_module.has_key("theme_footer"):
+        theme_footer(links, noendbody)
+        return
+    
     for i in range(len(links)):
         (url, name) = links[i]
         if url != "/" or tconfig.get("noindex"):
@@ -724,10 +730,9 @@ def footer(links=[], noendbody=None):
             f = open(os.path.join(root_directory, current_theme, tconfig.get("postbodyinclude")))
             print f.read()
 
-        # FIXME
-        #        if (defined(&theme_postbody)) {
-        #                &theme_postbody(@_);
-        #                }
+        if webmin_module.has_key("theme_postbody"):
+            theme_postbody(links, noendbody)
+
         print "</body></html>"
 
 
@@ -735,9 +740,14 @@ def _load_theme_library():
     """Load theme library"""
     if not current_theme or not tconfig.get("functions") or loaded_theme_library:
         return
-    # FIXME: Big problems! The themes are defined as Perl code.
-    # We must probably port the themes to Pyton as well. 
-    #do os.path.join(root_directory, current_theme, tconfig["functions"])
+    filename = tconfig["functions"]
+
+    # HACK!
+    if filename.endswith(".pl"):
+        filename = filename[:-3] + ".py"
+
+    themefile = os.path.join(root_directory, current_theme, filename)
+    execfile(themefile, webmin_module, webmin_module)
 
 ## redirect
 ## Output headers to redirect the browser to some page
@@ -814,8 +824,7 @@ def find_byname(name):
 def error(*message):
     """Display an error message and exit. The global variable whatfailed
     must be set to the name of the operation that failed."""
-    # FIXME
-    #load_theme_library()
+    _load_theme_library()
     if not os.environ.has_key("REQUEST_METHOD"):
         # Show text-only error
         print >> sys.stderr, text["error"]
@@ -826,8 +835,8 @@ def error(*message):
             for msg in message:
                 print >> sys.stderr, msg
         print >> sys.stderr, "-----"
-    # FIXME
-    #elif (defined(&theme_error))
+    elif webmin_module.has_key("theme_error"):
+        theme_error(*message)
     else:
         header(text['error'], "");
         print "<hr>"
