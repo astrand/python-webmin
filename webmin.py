@@ -26,6 +26,7 @@
 import socket
 import os
 import sys
+import re
 
 #
 # Global variables
@@ -1422,14 +1423,14 @@ def init_config():
            scriptname, remote_user, base_remote_user, current_theme, \
            root_directory, module_root_directory
     global no_acl_check, no_referers_check
-    
+
     # Read the webmin global config file. This contains the OS type and version,
     # OS specific configuration and global options such as proxy servers
-    gconfig = read_file_cached("$config_directory/config")
-    
+    gconfig = read_file_cached(os.path.join(config_directory, "config"))
+
     # Set PATH and LD_LIBRARY_PATH
     if gconfig.has_key("path"): os.environ["PATH"] = gconfig["path"]
-    if gconfig.has_key("ld_env"): os.environ[gconfig["ld_env"]] = gconfig["ld_path"]
+    if gconfig.has_key("ld_env"): os.environ[gconfig["ld_env"]] = gconfig.get("ld_path", "")
 
     if os.environ.has_key("FOREIGN_MODULE_NAME"):
         # In a foreign call - use the module name given
@@ -1437,7 +1438,8 @@ def init_config():
         module_name = os.environ["FOREIGN_MODULE_NAME"]
     elif os.environ.has_key("SCRIPT_NAME"):
         sn = os.environ["SCRIPT_NAME"]
-        sn = sn.replace(gconfig["webprefix"], "")
+        if gconfig.has_key("webprefix"):
+            sn = sn.replace(gconfig["webprefix"], "")
         match = re.search("^\/([^\/]+)\/", sn)
         if match:
             module_name = match.group(1)
