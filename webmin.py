@@ -1869,6 +1869,7 @@ def get_module_info(module, noclone=None):
 
     return rv
 
+
 def get_all_module_infos(nocache=None):
     """Returns a vector contains the information on all modules in this webmin
     install, including clones, like:
@@ -1921,24 +1922,6 @@ def get_all_module_infos(nocache=None):
     return all_modules_dict.values()
 
 
-## Need to rebuild cache
-#%cache = ( );
-#opendir(DIR, $root_directory);
-#foreach $m (readdir(DIR)) {
-#        next if ($m =~ /^(config-|\.)/ || $m =~ /\.(cgi|pl)$/);
-#        local %minfo = &get_module_info($m);
-#        push(@rv, \%minfo);
-#        foreach $k (keys %minfo) {
-#                $cache{"${m} ${k}"} = $minfo{$k};
-#                }
-#        }
-#closedir(DIR);
-#$cache{'lang'} = $current_lang;
-#$cache{'mtime'} = $st[9];
-#&write_file($cache_file, \%cache) if (!$_[0]);
-#return @rv;
-#}
-#
 ## get_theme_info(theme)
 def get_theme_info():
     raise NotImplementedError
@@ -1995,8 +1978,6 @@ def list_languages():
         return list_languages_cache
 
 
-
-#
 ## read_env_file(file, &array)
 def read_env_file():
     raise NotImplementedError
