@@ -132,6 +132,9 @@ def read_file_cached(file, dict={}):
 
 ## write_file(file, array)
 ## Write out the contents of an associative array as name=value lines
+
+def write_file():
+    raise NotImplementedError
 #sub write_file
 #{
 #local(%old, @order);
@@ -150,6 +153,8 @@ def read_file_cached(file, dict={}):
 #}
 #
 ## html_escape
+def html_escape():
+    raise NotImplementedError
 ## Convert &, < and > codes in text to HTML entities
 #sub html_escape
 #{
@@ -164,6 +169,10 @@ def read_file_cached(file, dict={}):
 #}
 #
 ## tempname([filename])
+
+def tempname():
+    raise NotImplementedError
+
 ## Returns a mostly random temporary file name
 #sub tempname
 #{
@@ -194,6 +203,8 @@ def read_file_cached(file, dict={}):
 #}
 #
 ## trunc
+def trunc():
+    raise NotImplementedError
 ## Truncation a string to the shortest whole word less than or equal to
 ## the given width
 #sub trunc {
@@ -209,6 +220,9 @@ def read_file_cached(file, dict={}):
 #}
 #
 ## indexof
+
+def indexof():
+    raise NotImplementedError
 ## Returns the index of some value in an array, or -1
 #sub indexof {
 #  local($i);
@@ -219,6 +233,8 @@ def read_file_cached(file, dict={}):
 #  }
 #
 ## unique
+def unique():
+    raise NotImplementedError
 ## Returns the unique elements of some array
 #sub unique
 #{
@@ -230,6 +246,8 @@ def read_file_cached(file, dict={}):
 #}
 #
 ## sysprint(handle, [string]+)
+def sysprint():
+    raise NotImplementedError
 #sub sysprint
 #{
 #local($str, $fh);
@@ -239,6 +257,9 @@ def read_file_cached(file, dict={}):
 #}
 #
 ## check_ipaddress(ip)
+
+def check_ipaddress(ip):
+    raise NotImplementedError
 ## Check if some IP address is properly formatted
 #sub check_ipaddress
 #{
@@ -250,6 +271,8 @@ def read_file_cached(file, dict={}):
 #}
 #
 ## generate_icon(image, title, link, [href])
+def generate_icon():
+    raise NotImplementedError
 #sub generate_icon
 #{
 #if ($_[2]) {
@@ -266,6 +289,9 @@ def read_file_cached(file, dict={}):
 #}
 #
 ## urlize
+
+def urlize():
+    raise NotImplementedError
 ## Convert a string to a form ok for putting in a URL
 #sub urlize {
 #  local $rv = $_[0];
@@ -297,6 +323,8 @@ def read_file_cached(file, dict={}):
 ## include
 ## Read and output the named file
 #sub include
+def include():
+    raise NotImplementedError
 #{
 #open(INCLUDE, $_[0]) || return 0;
 #while(<INCLUDE>) {
@@ -307,6 +335,9 @@ def read_file_cached(file, dict={}):
 #}
 #
 ## copydata
+
+def copydata():
+    raise NotImplementedError
 ## Read from one file handle and write to another
 #sub copydata
 #{
@@ -318,6 +349,10 @@ def read_file_cached(file, dict={}):
 #        }
 #}
 #
+
+def ReadParseMime():
+    raise NotImplementedError
+
 ## ReadParseMime
 ## Read data submitted via a POST request using the multipart/form-data coding
 #sub ReadParseMime
@@ -377,7 +412,12 @@ def read_file_cached(file, dict={}):
 #        }
 #}
 #
+
 ## ReadParse([&assoc], [method])
+def ReadParse():
+    raise NotImplementedError
+
+
 ## Fills the given associative array with CGI parameters, or uses the global
 ## %in if none is given. Also sets the global variables $in and @in
 #sub ReadParse
@@ -421,6 +461,10 @@ def read_file_cached(file, dict={}):
 ## include a link to help, and a link to the config page.
 ## The header will also have a link to to webmin index, and a link to the
 ## module menu if there is no config link
+
+def header():
+    raise NotImplementedError
+
 #sub header
 #{
 #return if ($main::done_webmin_header++);
@@ -603,6 +647,10 @@ def read_file_cached(file, dict={}):
 #
 ## footer([page, name]+, [noendbody])
 ## Output a footer for returning to some page
+
+def footer():
+    raise NotImplementedError
+
 #sub footer
 #{
 #&load_theme_library();
@@ -675,6 +723,10 @@ def read_file_cached(file, dict={}):
 #
 ## redirect
 ## Output headers to redirect the browser to some page
+
+def redirect():
+    raise NotImplementedError
+
 #sub redirect
 #{
 #local($port, $prot, $url);
@@ -698,6 +750,9 @@ def read_file_cached(file, dict={}):
 #}
 #
 ## kill_byname(name, signal)
+
+def kill_byname(name, signal):
+    raise NotImplementedError
 ## Use the command defined in the global config to find and send a signal
 ## to a process matching some name
 #sub kill_byname
@@ -709,6 +764,10 @@ def read_file_cached(file, dict={}):
 #}
 #
 ## kill_byname_logged(name, signal)
+
+def kill_byname_logged(name, signal):
+    raise NotImplementedError
+
 ## Like kill_byname, but also logs the killing
 #sub kill_byname_logged
 #{
@@ -719,6 +778,9 @@ def read_file_cached(file, dict={}):
 #}
 #
 ## find_byname(name)
+
+def find_byname(name):
+    raise NotImplementedError
 ## Finds a process by name, and returns a list of matching PIDs
 #sub find_byname
 #{
@@ -767,6 +829,9 @@ def error(*message):
 #}
 #
 ## wait_for(handle, regexp, regexp, ...)
+
+def wait_for():
+    raise NotImplementedError
 ## Read from the input stream until one of the regexps matches..
 #sub wait_for
 #{
@@ -795,6 +860,8 @@ def error(*message):
 #}
 #
 ## fast_wait_for(handle, string, string, ...)
+def fast_wait_for():
+    raise NotImplementedError
 #sub fast_wait_for
 #{
 #local($inp, $maxlen, $ha, $i, $c, $inpl);
@@ -820,6 +887,9 @@ def error(*message):
 #}
 #
 ## has_command(command)
+
+def has_command(command):
+    raise NotImplementedError
 ## Returns the full path if some command is in the path, undef if not
 #sub has_command
 #{
@@ -833,6 +903,8 @@ def error(*message):
 #}
 #
 ## make_date(seconds)
+def make_date():
+    raise NotImplementedError
 ## Converts a Unix date/time in seconds to a human-readable form
 #sub make_date
 #{
@@ -844,6 +916,9 @@ def error(*message):
 #}
 #
 ## file_chooser_button(input, type, [form], [chroot])
+
+def file_chooser_button():
+    raise NotImplementedError
 ## Return HTML for a file chooser button, if the browser supports Javascript.
 ## Type values are 0 for file or directory, or 1 for directory only
 #sub file_chooser_button
@@ -958,6 +1033,9 @@ def read_acl():
 #}
 #
 ## http_download(host, port, page, destfile, [&error], [&callback])
+
+def http_download():
+    raise NotImplementedError
 ## Download data from a HTTP url to a local file
 #sub http_download
 #{
@@ -1039,6 +1117,8 @@ def read_acl():
 #
 #
 ## ftp_download(host, file, destfile, [&error], [&callback])
+def ftp_download():
+    raise NotImplementedError
 ## Download data from an FTP site to a local file
 #sub ftp_download
 #{
@@ -1176,6 +1256,8 @@ def read_acl():
 #}
 #
 ## to_ipaddress(hostname)
+def to_ipaddress():
+    raise NotImplementedError
 ## Converts a hostname to an a.b.c.d format IP address
 #sub to_ipaddress
 #{
@@ -1191,6 +1273,8 @@ def read_acl():
 #}
 #
 ## icons_table(&links, &titles, &icons, [columns], [href])
+def icons_table():
+    raise NotImplementedError
 ## Renders a 4-column table of icons
 #sub icons_table
 #{
@@ -1210,6 +1294,8 @@ def read_acl():
 #}
 #
 ## replace_file_line(file, line, [newline]*)
+def replace_file_line():
+    raise NotImplementedError
 ## Replaces one line in some file with 0 or more new lines
 #sub replace_file_line
 #{
@@ -1225,6 +1311,8 @@ def read_acl():
 #}
 #
 ## read_file_lines(file)
+def read_file_lines():
+    raise NotImplementedError
 ## Returns a reference to an array containing the lines from some file. This
 ## array can be modified, and will be written out when flush_file_lines()
 ## is called.
@@ -1244,6 +1332,8 @@ def read_acl():
 #}
 #
 ## flush_file_lines()
+def flush_file_lines():
+    raise NotImplementedError
 #sub flush_file_lines
 #{
 #foreach $f (keys %file_cache) {
@@ -1273,6 +1363,10 @@ def read_acl():
 #}
 #
 ## hlink(text, page, [module])
+
+def hlink():
+    raise NotImplementedError
+
 #sub hlink
 #{
 #local $mod = $_[2] ? $_[2] : $module_name;
@@ -1280,6 +1374,9 @@ def read_acl():
 #}
 #
 ## user_chooser_button(field, multiple, [form])
+
+def user_chooser_button():
+    raise NotImplementedError
 ## Returns HTML for a javascript button for choosing a Unix user or users
 #sub user_chooser_button
 #{
@@ -1289,6 +1386,8 @@ def read_acl():
 #}
 #
 ## group_chooser_button(field, multiple, [form])
+def group_chooser_button():
+    raise NotImplementedError
 ## Returns HTML for a javascript button for choosing a Unix group or groups
 #sub group_chooser_button
 #{
@@ -1298,6 +1397,9 @@ def read_acl():
 #}
 #
 ## foreign_check(module)
+
+def foreign_check():
+    raise NotImplementedError
 ## Checks if some other module exists and is supported on this OS
 #sub foreign_check
 #{
@@ -1307,6 +1409,9 @@ def read_acl():
 #}
 #
 ## foreign_require(module, file)
+
+def foreign_require(module, file):
+    raise NotImplementedError
 ## Brings in functions from another module
 #sub foreign_require
 #{
@@ -1327,6 +1432,9 @@ def read_acl():
 #}
 #
 ## foreign_call(module, function, [arg]*)
+
+def foreign_call():
+    raise NotImplementedError
 ## Call a function in another module
 #sub foreign_call
 #{
@@ -1342,6 +1450,9 @@ def read_acl():
 #}
 #
 ## foreign_config(module)
+
+def foreign_config():
+    raise NotImplementedError
 ## Get the configuration from another module
 #sub foreign_config
 #{
@@ -1351,6 +1462,9 @@ def read_acl():
 #}
 #
 ## get_system_hostname()
+
+def get_system_hostname():
+    raise NotImplementedError
 ## Returns the hostname of this system
 #sub get_system_hostname
 #{
@@ -1366,6 +1480,8 @@ def read_acl():
 #}
 #
 ## get_webmin_version()
+def get_webmin_version():
+    raise NotImplementedError
 ## Returns the version of Webmin currently being run
 #sub get_webmin_version
 #{
@@ -1378,6 +1494,9 @@ def read_acl():
 #}
 #
 ## get_module_acl([user], [module])
+
+def get_module_acl():
+    raise NotImplementedError
 ## Returns an array containing access control options for the given user
 #sub get_module_acl
 #{
@@ -1402,6 +1521,9 @@ def read_acl():
 #}
 #
 ## save_module_acl(&acl, [user], [module])
+
+def save_module_acl():
+    raise NotImplementedError
 ## Updates the acl hash for some user and module (or the current one)
 #sub save_module_acl
 #{
@@ -1684,6 +1806,8 @@ def terror(*params):
     error(textsub(*params))
     
 ## encode_base64(string)
+def encode_base64():
+    raise NotImplementedError
 ## Encodes a string into base64 format
 #sub encode_base64
 #{
@@ -1747,6 +1871,8 @@ def get_module_info(module, noclone=None):
     return rv
 
 ## get_all_module_infos([nocache])
+def get_all_module_infos():
+    raise NotImplementedError
 ## Returns a vector contains the information on all modules in this webmin
 ## install, including clones
 #sub get_all_module_infos
@@ -1786,6 +1912,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## get_theme_info(theme)
+def get_theme_info():
+    raise NotImplementedError
 ## Returns a hash containing a theme's details
 #sub get_theme_info
 #{
@@ -1798,6 +1926,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## list_languages()
+def list_languages():
+    raise NotImplementedError
 ## Returns an array of supported languages
 #sub list_languages
 #{
@@ -1824,6 +1954,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## read_env_file(file, &array)
+def read_env_file():
+    raise NotImplementedError
 #sub read_env_file
 #{
 #open(FILE, $_[0]) || return 0;
@@ -1840,6 +1972,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## write_env_file(file, &array, export)
+def write_env_file():
+    raise NotImplementedError
 #sub write_env_file
 #{
 #local $k;
@@ -1858,6 +1992,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## lock_file(filename, [readonly], [forcefile])
+def lock_file():
+    raise NotImplementedError
 ## Lock a file for exclusive access. If the file is already locked, spin
 ## until it is freed. This version uses a .lock file, which is not very reliable.
 #sub lock_file
@@ -1910,6 +2046,8 @@ def get_module_info(module, noclone=None):
 ## unlock_file(filename)
 ## Release a lock on a file. When unlocking a file that was locked in
 ## read mode, optionally save the update in RCS
+def unlock_file():
+    raise NotImplementedError
 #sub unlock_file
 #{
 #return if (!$_[0] || !defined($main::locked_file_list{$_[0]}));
@@ -1983,6 +2121,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## unlock_all_files()
+def unlock_all_files():
+    raise NotImplementedError
 ## Unlocks all files locked by this program
 #sub unlock_all_files
 #{
@@ -1992,6 +2132,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## webmin_log(action, type, object, &params, [module])
+def webmin_log():
+    raise NotImplementedError
 ## Log some action taken by a user
 #sub webmin_log
 #{
@@ -2088,6 +2230,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## system_logged(command)
+def system_logged():
+    raise NotImplementedError
 ## Just calls the system() function, but also logs the command
 #sub system_logged
 #{
@@ -2104,6 +2248,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## backquote_logged(command)
+def backquote_logged():
+    raise NotImplementedError
 ## Executes a command and returns the output (like `cmd`), but also logs it
 #sub backquote_logged
 #{
@@ -2120,6 +2266,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## kill_logged(signal, pid, ...)
+def kill_logged():
+    raise NotImplementedError
 #sub kill_logged
 #{
 #&additional_log('kill', $_[0], join(" ", @_[1..@_-1])) if (@_ > 1);
@@ -2127,6 +2275,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## rename_logged(old, new)
+def rename_logged():
+    raise NotImplementedError
 #sub rename_logged
 #{
 #&additional_log('rename', $_[0], $_[1]) if ($_[0] ne $_[1]);
@@ -2134,6 +2284,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## remote_foreign_require(server, module, file)
+def remote_foreign_require():
+    raise NotImplementedError
 ## Connect to rpc.cgi on a remote webmin server and have it open a session
 ## to a process that will actually do the require and run functions.
 #sub remote_foreign_require
@@ -2152,6 +2304,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## remote_foreign_call(server, module, function, [arg]*)
+def remote_foreign_call():
+    raise NotImplementedError
 ## Call a function on a remote server. Must have been setup first with
 ## remote_foreign_require for the same server and module
 #sub remote_foreign_call
@@ -2164,6 +2318,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## remote_foreign_check(server, module)
+def remote_foreign_check():
+    raise NotImplementedError
 ## Checks if some module is installed and supported on a remote server
 #sub remote_foreign_check
 #{
@@ -2172,6 +2328,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## remote_foreign_config(server, module)
+def remote_foreign_config():
+    raise NotImplementedError
 ## Gets the configuration for some module from a remote server
 #sub remote_foreign_config
 #{
@@ -2180,6 +2338,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## remote_eval(server, module, code)
+def remote_eval():
+    raise NotImplementedError
 ## Eval some perl code in the context of a module on a remote webmin server
 #sub remote_eval
 #{
@@ -2190,6 +2350,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## remote_write(server, localfile, [remotefile])
+def remote_write():
+    raise NotImplementedError
 #sub remote_write
 #{
 #local ($data, $got);
@@ -2224,6 +2386,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## remote_read(server, localfile, remotefile)
+def remote_read():
+    raise NotImplementedError
 #sub remote_read
 #{
 #if ($remote_server_version{$_[0]} >= 0.966) {
@@ -2254,6 +2418,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## remote_finished()
+def remote_finished():
+    raise NotImplementedError
 ## Close all remote sessions. This happens automatically after a while
 ## anyway, but this function should be called to clean things up faster.
 #sub remote_finished
@@ -2268,6 +2434,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## remote_error_setup(&function)
+def remote_error_setup():
+    raise NotImplementedError
 ## Sets a function to be called instead of &error when a remote RPC fails
 #sub remote_error_setup
 #{
@@ -2526,6 +2694,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## other_groups(user)
+def other_groups():
+    raise NotImplementedError
 ## Returns a list of secondary groups a user is a member of
 #sub other_groups
 #{
@@ -2540,6 +2710,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## date_chooser_button(dayfield, monthfield, yearfield, [form])
+def date_chooser_button():
+    raiste NotImplementedError
 ## Returns HTML for a date-chooser button
 #sub date_chooser_button
 #{
@@ -2558,6 +2730,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## seed_random()
+def seed_random():
+    raise NotImplementedError
 ## Seeds the random number generator, if needed
 #sub seed_random
 #{
@@ -2576,6 +2750,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## disk_usage_kb(directory)
+def disk_usage_kb():
+    raise NotImplementedError
 ## Returns the number of kb used by some directory and all subdirs
 #sub disk_usage_kb
 #{
@@ -2587,6 +2763,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## help_search_link(term, [ section, ... ] )
+def help_search_link():
+    raise NotImplementedError
 ## Returns HTML for a link to the man module for searching local and online
 ## docs for various search terms
 #sub help_search_link
@@ -2606,6 +2784,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## make_http_connection(host, port, ssl, method, page)
+def make_http_connection():
+    raise NotImplementedError
 ## Opens a connection to some HTTP server, maybe through a proxy, and returns
 ## a handle object. The handle can then be used to send additional headers
 ## and read back a response. If anything goes wrong, returns an error string.
@@ -2681,6 +2861,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## read_http_connection(handle, [amount])
+def read_http_connection():
+    raise NotImplementedError
 ## Reads either one line or up to the specified amount of data from the handle
 #sub read_http_connection
 #{
@@ -2725,6 +2907,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## write_http_connection(handle, [data+])
+def write_http_connection():
+    raise NotImplementedError
 ## Writes the given data to the handle
 #sub write_http_connection
 #{
@@ -2741,12 +2925,16 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## close_http_connection(handle)
+def close_http_connection():
+    raise NotImplementedError
 #sub close_http_connection
 #{
 #close($h->{'fh'});
 #}
 #
 ## clean_environment()
+def clean_environment():
+    raise NotImplementedError
 ## Deletes any environment variables inherited from miniserv so that they
 ## won't be passed to programs started by webmin.
 #sub clean_environment
@@ -2768,6 +2956,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## reset_environment()
+def reset_environment():
+    raise NotImplementedError
 ## Puts the environment back how it was before &clean_environment
 #sub reset_environment
 #{
@@ -2816,6 +3006,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## switch_to_remote_user()
+def switch_to_remote_user():
+    raise NotImplementedError
 ## Changes the user and group of the current process to that of the unix user
 ## with the same name as the current webmin login, or fails if there is none.
 #sub switch_to_remote_user
@@ -2833,6 +3025,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## create_user_config_dirs()
+def create_user_config_dirs():
+    raise NotImplementedError
 ## Creates per-user config directories and sets $user_config_directory and
 ## $user_module_config_directory to them. Also reads per-user module configs
 ## into %userconfig
@@ -2857,6 +3051,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## filter_javascript(text)
+def filter_javascript():
+    raise NotImplementedError
 ## Disables all javascript <script>, onClick= and so on tags in the given HTML
 #sub filter_javascript
 #{
@@ -2867,6 +3063,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## resolve_links(path)
+def resolve_links():
+    raise NotImplementedError
 ## Given a path that may contain symbolic links, returns the real path
 #sub resolve_links
 #{
@@ -2891,6 +3089,8 @@ def get_module_info(module, noclone=None):
 #}
 #
 ## same_file(file1, file2)
+def same_file():
+    raise NotImplementedError
 ## Returns 1 if two files are actually the same
 #sub same_file
 #{
