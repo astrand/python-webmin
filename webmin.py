@@ -67,8 +67,7 @@ current_theme = None
 root_directory = None
 module_root_directory = None
 module_categories = {}
-current_lang = None
-
+current_lang = "en"
 default_lang = "en"
 
 
@@ -1588,7 +1587,7 @@ def init_config():
     global config, gconfig, module_name, module_config_directory, tb, cb, \
            scriptname, remote_user, base_remote_user, current_theme, \
            root_directory, module_root_directory
-    global no_acl_check, no_referers_check, current_lang
+    global no_acl_check, no_referers_check, current_lang, text
 
     # Read the webmin global config file. This contains the OS type and version,
     # OS specific configuration and global options such as proxy servers
@@ -1681,7 +1680,7 @@ def init_config():
     text = load_language(module_name)
     if not text:
         error("Failed to determine Webmin root from SERVER_ROOT or SCRIPT_FILENAME")
-        
+
     # Check if the HTTP user can access this module
     if (module_name and not no_acl_check and not
         os.environ.has_key("FOREIGN_MODULE_NAME")):
@@ -1881,6 +1880,8 @@ def decode_base64():
 #}
 #
 
+# FIXME: This function is called from init_config(), but before the current_lang
+# variable has been initalized. Strange...
 def get_module_info(module, noclone=None):
     """Returns a hash containg a module name, desc and os_support"""
     if module.startswith("."): return {}
@@ -1898,6 +1899,7 @@ def get_module_info(module, noclone=None):
 
     rv["dir"] = module
     # FIXME: What is module_categories for?
+    global module_categories
     if not module_categories and config_directory:
         module_categories = read_file_cached(os.path.join(config_directory, "webmin.cats"))
 
