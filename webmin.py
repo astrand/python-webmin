@@ -1830,46 +1830,15 @@ def textsub(message, *substitute):
 def terror(*params):
     error(textsub(*params))
     
-## encode_base64(string)
-def encode_base64():
-    raise NotImplementedError
-## Encodes a string into base64 format
-#sub encode_base64
-#{
-#    local $res;
-#    pos($_[0]) = 0;                          # ensure start at the beginning
-#    while ($_[0] =~ /(.{1,57})/gs) {
-#        $res .= substr(pack('u57', $1), 1)."\n";
-#        chop($res);
-#    }
-#    $res =~ tr|\` -_|AA-Za-z0-9+/|;
-#    local $padding = (3 - length($_[0]) % 3) % 3;
-#    $res =~ s/.{$padding}$/'=' x $padding/e if ($padding);
-#    return $res;
-#}
-#
-## decode_base64(string)
-def decode_base64():
-    raise NotImplementedError
-## Converts a base64 string into plain text
-#sub decode_base64
-#{
-#    local $str = $_[0];
-#    local $res;
-# 
-#    $str =~ tr|A-Za-z0-9+=/||cd;            # remove non-base64 chars
-#    if (length($str) % 4) {
-#        return undef;
-#    }
-#    $str =~ s/=+$//;                        # remove padding
-#    $str =~ tr|A-Za-z0-9+/| -_|;            # convert to uuencoded format
-#    while ($str =~ /(.{1,60})/gs) {
-#        my $len = chr(32 + length($1)*3/4); # compute length byte
-#        $res .= unpack("u", $len . $1 );    # uudecode
-#    }
-#    return $res;
-#}
-#
+def encode_base64(s):
+    """Encodes a string into base64 format"""
+    return base64.encodestring(s)
+
+
+def decode_base64(s):
+    """Converts a base64 string into plain text"""
+    return base64.decodestring(s)
+
 
 # FIXME: This function is called from init_config(), but before the current_lang
 # variable has been initalized. Strange...
