@@ -1,7 +1,7 @@
 Summary: A Python implementation of the Webmin API
 Name: python-webmin
 Version: 0.3pre
-Release: 1
+Release: 2
 Requires: webmin
 Copyright: GPL
 Group: System/Tools
@@ -31,5 +31,5 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-/usr/libexec/webmin/webmin.py
-/usr/libexec/webmin/mscstyle3/theme.py
+/opt/python-webmin/webmin.py
+/opt/python-webmin/mscstyle3/theme.py
