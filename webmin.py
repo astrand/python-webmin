@@ -89,7 +89,10 @@ pragma_no_cache               = None
 loaded_theme_library          = None
 module_info                   = None
 indata                        = None
+theme_no_table                = 0
+anonymous_user                = 0
 webmin_module                 = globals()
+
 
 
 # ----------------------------------------------------------------
@@ -478,6 +481,7 @@ def header(title, image=None, help=None, config=None, nomodule=None, nowebmin=No
     if (charset):
         print "<meta http-equiv=\"Content-Type\" "\
               "content=\"text/html; charset=%s\">" % charset
+    print "<link rel='icon' href='/images/webmin_icon.png' type='image/png'>"        
 
     if gconfig.has_key("real_os_type"):
         os_type = gconfig["real_os_type"]
@@ -713,7 +717,10 @@ def _load_theme_library():
         filename = filename[:-3] + ".py"
 
     themefile = os.path.join(root_directory, current_theme, filename)
-    execfile(themefile, webmin_module, webmin_module)
+    try:
+        execfile(themefile, webmin_module, webmin_module)
+    except IOError:
+        pass
 
 
 ## redirect
@@ -1621,15 +1628,15 @@ def init_config():
         
     # Set some useful variables
     # FIXME: Themes disabled, because no themes are ported yet. 
-##     current_theme = gconfig.get("theme_" + remote_user)
-##     if not current_theme:
-##         current_theme = gconfig.get("theme_" + base_remote_user)
-##     if not current_theme:
-##         current_theme = gconfig.get("theme", "")
+    if not current_theme:
+        current_theme = gconfig.get("theme_" + base_remote_user)
+    if not current_theme:
+        current_theme = gconfig.get("theme", "")
 
-##     if current_theme:
-##         read_file_cached(os.path.join(root_directory, current_theme, "config"),
-##                          tconfig)
+    if current_theme:
+        read_file_cached(os.path.join(root_directory,
+                                      current_theme, "config"),
+                         tconfig)
 
     tmpdict = {"cs_header" : "#9999ff"}
     tmpdict.update(gconfig)
@@ -1973,8 +1980,9 @@ def list_languages():
 
         # Done with file. Sort.
         list_languages_cache.sort(lambda x,y: x["desc"] < y["desc"])
+
         
-        return list_languages_cache
+    return list_languages_cache
 
 
 ## read_env_file(file, &array)
