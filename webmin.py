@@ -30,6 +30,7 @@ import re
 import types
 import cgi
 import time
+import cgi
 
 #
 # Global variables
@@ -82,6 +83,7 @@ user_module_config_directory = None
 pragma_no_cache = None
 loaded_theme_library = None
 module_info = None
+indata = None
 
 #
 # Themes
@@ -345,97 +347,70 @@ def copydata():
 #
 
 def ReadParseMime():
-    raise NotImplementedError
+    # ReadParseMime
+# Read data submitted via a POST request using the multipart/form-data coding
+sub ReadParseMime
+{
+local ($boundary, $line, $foo, $name);
+$ENV{CONTENT_TYPE} =~ /boundary=(.*)$/;
+$boundary = $1;
+<STDIN>;	# skip first boundary
+while(1) {
+	$name = "";
+	# Read section headers
+	local $lastheader;
+	while(1) {
+		$line = <STDIN>;
+		$line =~ s/\r|\n//g;
+		last if (!$line);
+		if ($line =~ /^(\S+):\s*(.*)$/) {
+			$header{$lastheader = lc($1)} = $2;
+			}
+		elsif ($line =~ /^\s+(.*)$/) {
+			$header{$lastheader} .= $line;
+			}
+		}
 
-## ReadParseMime
-## Read data submitted via a POST request using the multipart/form-data coding
-#sub ReadParseMime
-#{
-#local ($boundary, $line, $foo, $name);
-#$ENV{CONTENT_TYPE} =~ /boundary=(.*)$/;
-#$boundary = $1;
-#<STDIN>;	# skip first boundary
-#while(1) {
-#        $name = "";
-#        # Read section headers
-#        local $lastheader;
-#        while(1) {
-#                $line = <STDIN>;
-#                $line =~ s/\r|\n//g;
-#                last if (!$line);
-#                if ($line =~ /^(\S+):\s*(.*)$/) {
-#                        $header{$lastheader = lc($1)} = $2;
-#                        }
-#                elsif ($line =~ /^\s+(.*)$/) {
-#                        $header{$lastheader} .= $line;
-#                        }
-#                }
-#
-#        # Parse out filename and type
-#        if ($header{'content-disposition'} =~ /^form-data(.*)/) {
-#                $rest = $1;
-#                while ($rest =~ /([a-zA-Z]*)=\"([^\"]*)\"(.*)/) {
-#                        if ($1 eq 'name') {
-#                                $name = $2;
-#                                }
-#                        else {
-#                                $foo = $name . "_$1";
-#                                $in{$foo} = $2;
-#                                }
-#                        $rest = $3;
-#                        }
-#                }
-#        else {
-#                &error("Missing Content-Disposition header");
-#                }
-#        if ($header{'content-type'} =~ /^([^\s;]+)/) {
-#                $foo = $name . "_content_type";
-#                $in{$foo} = $1;
-#                }
-#
-#        # Read data
-#        $in{$name} .= "\0" if (defined($in{$name}));
-#        while(1) {
-#                $line = <STDIN>;
-#                if (!$line) { return; }
-#                if (index($line, $boundary) != -1) { last; }
-#                $in{$name} .= $line;
-#                }
-#        chop($in{$name}); chop($in{$name});
-#        if (index($line,"$boundary--") != -1) { last; }
-#        }
-#}
-#
+	# Parse out filename and type
+	if ($header{'content-disposition'} =~ /^form-data(.*)/) {
+		$rest = $1;
+		while ($rest =~ /([a-zA-Z]*)=\"([^\"]*)\"(.*)/) {
+			if ($1 eq 'name') {
+				$name = $2;
+				}
+			else {
+				$foo = $name . "_$1";
+				$in{$foo} = $2;
+				}
+			$rest = $3;
+			}
+		}
+	else {
+		&error("Missing Content-Disposition header");
+		}
+	if ($header{'content-type'} =~ /^([^\s;]+)/) {
+		$foo = $name . "_content_type";
+		$in{$foo} = $1;
+		}
 
-## ReadParse([&assoc], [method])
+	# Read data
+	$in{$name} .= "\0" if (defined($in{$name}));
+	while(1) {
+		$line = <STDIN>;
+		if (!$line) { return; }
+		if (index($line, $boundary) != -1) { last; }
+		$in{$name} .= $line;
+		}
+	chop($in{$name}); chop($in{$name});
+	if (index($line,"$boundary--") != -1) { last; }
+	}
+}
+    
+
 def ReadParse():
-    raise NotImplementedError
+    global indata
+    indata = cgi.FieldStorage()
 
-
-## Fills the given associative array with CGI parameters, or uses the global
-## %in if none is given. Also sets the global variables $in and @in
-#sub ReadParse
-#{
-#local $a = $_[0] ? $_[0] : \%in;
-#local $i;
-#local $meth = $_[1] ? $_[1] : $ENV{'REQUEST_METHOD'};
-#undef($in);
-#if ($meth eq 'POST') {
-#        read(STDIN, $in, $ENV{'CONTENT_LENGTH'});
-#        }
-#if ($ENV{'QUERY_STRING'}) {
-#        if ($in) { $in .= "&".$ENV{'QUERY_STRING'}; }
-#        else { $in = $ENV{'QUERY_STRING'}; }
-#        }
-#@in = split(/\&/, $in);
-#foreach $i (@in) {
-#        local ($k, $v) = split(/=/, $i, 2);
-#        $k =~ s/\+/ /g; $k =~ s/%(..)/pack("c",hex($1))/ge;
-#        $v =~ s/\+/ /g; $v =~ s/%(..)/pack("c",hex($1))/ge;
-#        $a->{$k} = defined($a->{$k}) ? $a->{$k}."\0".$v : $v;
-#        }
-#}
-#
 
 def _PrintHeader(charset=None):
     """Outputs the HTTP header for HTML"""
