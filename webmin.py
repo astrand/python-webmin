@@ -38,6 +38,7 @@ read_file_cache = None
 tempfilecount = 0
 done_webmin_header = 0
 whatfailed = None
+# A dictionary of dictionaries, like: {"john": {"webmin": 1, "bsdexports": 1}}
 acl_hash_cache = {}
 acl_array_cache = {}
 done_foreign_require = None
@@ -953,8 +954,14 @@ def read_acl():
             if match:
                 user = match.group(1)
                 mods = group(2).split()
+                try:
+                    d = acl_hash_cache[user]
+                except KeyError:
+                    acl_hash_cache[user] = d = {}
+                
                 for mod in mods:
-                    acl_hash_cache[user + mod] = 1
+                    d[mod] = 1
+                    
                 acl_array_cache[user] = mods
     
     # Available as global variables, but return them anyway...
