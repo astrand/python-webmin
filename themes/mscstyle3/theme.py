@@ -40,6 +40,9 @@ if IsUsermin == 1:
      pytheme_logo_link ="http://www.usermin.com/"
      pytheme_logo_alt = "Usermin homepage"
      module_infos_access=1
+     noprefs = config.get("noprefs")     
+     if noprefs==0 or noprefs=="0":
+        noprefs=None
 else:
      available = ["webmin", "system", "servers", "cluster", "hardware", 
                   "", "net", "kororaweb"]
@@ -47,6 +50,7 @@ else:
      pytheme_logo_link ="http://www.webmin.com/"
      pytheme_logo_alt = "Webmin homepage"
      module_infos_access=0
+     noprefs = None
 
 letter_sizes = {
 	'100.gif': [ 10, 16 ],
@@ -296,7 +300,7 @@ def theme_header(title, image=None, help=None, config=None, nomodule=None, noweb
         print '<body bgcolor="#6696bc" link="#000000" vlink="#000000" text="#000000" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" ', body, '>'
 
     else:
-	print '<body bgcolor="#6696bc" link="#000000" vlink="#000000" text="#000000" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" ', body, '>'
+        print '<body bgcolor="#6696bc" link="#000000" vlink="#000000" text="#000000" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" ', body, '>'
         
 
     if None != session_id:
@@ -441,9 +445,61 @@ def theme_header(title, image=None, help=None, config=None, nomodule=None, noweb
                                   cellspacing="0", cellpadding="0",
                                   background="/images/nav/bottom_shadow2.jpg")
 
-    tab_under_modcats.append(TR() + [TD(IMG("/images/nav/bottom_shadow.jpg", width=43, height="9"))])
+    # ---new/changed display (user) preference tab
+    tab_under_modcats_prefs=None
+    tab_under_modcats_help=None
+    if help:        
+        if type(help) == types.ListType:
+            helplink =  hlink(text["header_help"], help[0], help[1])
+        else:
+            helplink = hlink(text["header_help"], help)
+        tab_under_modcats_help = TableLite(border="0",cellspacing="0", cellpadding="0")
+        tab_under_modcats_help.append(TR() + [TD(IMG("/images/tabs/left.jpg", width=12, height="21"),background="/images/tabs/bg.jpg")]+\
+                                [TD(Code(helplink),background="/images/tabs/bg.jpg")]+\
+                                [TD(IMG("/images/tabs/right.jpg", width=15, height="21"),background="/images/tabs/bg.jpg")])    
+        tab_under_modcats_help.append(TR() + [TD(IMG("/images/tabs/right_bottom.jpg", width=12, height="4"))]+\
+                                [TD(IMG("/images/tabs/bottom.jpg", width=17, height="4"),background="/images/tabs/bottom.jpg")]+\
+                                [TD(IMG("/images/tabs/left_bottom.jpg", width=15, height="4"))])    
 
+
+    
+    if config:
+        access = get_module_acl();
+        if not access.get("noconfig") and not noprefs:
+            if user_module_config_directory:
+                cprog = "uconfig.cgi"
+            else:
+                cprog = "config.cgi"            
+    
+            uri='%s/%s?%s' % (gconfig.get("webprefix", ""), cprog, module_name)	    
+            tab_under_modcats_prefs = TableLite(border="0",cellspacing="0", cellpadding="0")
+            tab_under_modcats_prefs.append(TR() + [TD(IMG("/images/tabs/left.jpg", width=12, height="21"),background="/images/tabs/bg.jpg")]+\
+                                    [TD(Href(uri,text["header_config"]),background="/images/tabs/bg.jpg")]+\
+                                    [TD(IMG("/images/tabs/right.jpg", width=15, height="21"),background="/images/tabs/bg.jpg")])    
+            tab_under_modcats_prefs.append(TR() + [TD(IMG("/images/tabs/right_bottom.jpg", width=12, height="4"))]+\
+                                    [TD(IMG("/images/tabs/bottom.jpg", width=17, height="4"),background="/images/tabs/bottom.jpg")]+\
+                                    [TD(IMG("/images/tabs/left_bottom.jpg", width=15, height="4"))])    
+
+    tab_under_modcats_inner = TableLite(width="100%", border="0",
+                                  cellspacing="0", cellpadding="0",
+                                  background="/images/nav/bottom_shadow2.jpg")
+    tab_under_modcats_inner.append(TR() + [TD(IMG("/images/nav/bottom_shadow.jpg", width=43, height="9"))])
+    if tab_under_modcats_help or tab_under_modcats_prefs:
+        tabTR = TR()
+        if tab_under_modcats_help:
+            tabTR = tabTR + [TD(tab_under_modcats_help)]
+        if tab_under_modcats_prefs:
+            tabTR = tabTR + [TD(tab_under_modcats_prefs)]
+        tabTR = tabTR + [TD(tab_under_modcats_inner,background="/images/nav/bottom_shadow2.jpg",width="100%",nowrap="nowarp",valign="top")]
+        tab_under_modcats(tabTR)
+        # tab_under_modcats.append(TR() + [TD(tab_under_modcats_prefs)]+ [TD(tab_under_modcats_inner,background="/images/nav/bottom_shadow2.jpg",width="100%",nowrap="nowarp",valign="top")])	
+    else:
+        tab_under_modcats.append(TR() + [TD(IMG("/images/nav/bottom_shadow.jpg", width=43, height="9"))])    
     print tab_under_modcats
+
+    print "<br>"
+    # ----end new display (user) preference tab
+
 
     if not nowebmin:
         title = title.replace("&auml;", "ä")
