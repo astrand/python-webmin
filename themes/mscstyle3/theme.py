@@ -1,3 +1,4 @@
+# -*- coding: iso-8859-1 -*-
 #
 # Python implementation of the mscstyle3 theme
 #
