@@ -270,24 +270,20 @@ def check_ipaddress(ip):
 #        $4 >= 0 && $4 <= 255;
 #}
 #
-## generate_icon(image, title, link, [href])
-def generate_icon():
-    raise NotImplementedError
-#sub generate_icon
-#{
-#if ($_[2]) {
-#        print "<table border><tr><td>\n",
-#              "<a href=\"$_[2]\" $_[3]><img src=\"$_[0]\" alt=\"\" border=0 ",
-#              "width=48 height=48></a></td></tr></table>\n";
-#        print "<a href=\"$_[2]\">$_[1]</a>\n";
-#        }
-#else {
-#        print "<table border><tr><td>\n",
-#              "<img src=\"$_[0]\" alt=\"\" border=0 width=48 height=48>",
-#              "</td></tr></table>\n$_[1]\n";
-#        }
-#}
-#
+
+def generate_icon(image, title, link=None, href=None):
+    if link and href:
+        print "<table border><tr><td>"
+        print "<a href='%s' %s><img src='%s' alt='' border=0 " % (link, href, image),
+        print "width=48 height=48></a></td></tr></table>"
+        print "<a href='%s'>%s</a>" % (link, title)
+    else:
+        print "<table border><tr><td>"
+        print "<img src='%s' alt='' border=0 width=48 height=48>" % image,
+        print "</td></tr></table>"
+        print title
+
+
 ## urlize
 
 def urlize():
@@ -1310,28 +1306,29 @@ def to_ipaddress():
 #        else { return undef; }
 #        }
 #}
-#
-## icons_table(&links, &titles, &icons, [columns], [href])
-def icons_table():
-    raise NotImplementedError
-## Renders a 4-column table of icons
-#sub icons_table
-#{
-#local($i);
-#local $cols = $_[3] ? $_[3] : 4;
-#local $per = int(100.0 / $cols);
-#print "<table width=100% cellpadding=5> <tr>\n";
-#for($i=0; $i<@{$_[0]}; $i++) {
-#        if ($i%$cols == 0) { print "<tr>\n"; }
-#        print "<td width=$per% align=center valign=top>\n";
-#        &generate_icon($_[2]->[$i], $_[1]->[$i], $_[0]->[$i], $_[4]);
-#        print "</td>\n";
-#        if ($i%$cols == $cols-1) { print "</tr>\n"; }
-#        }
-#while($i++%$cols) { print "<td width=$per%></td>\n"; }
-#print "</table><p>\n";
-#}
-#
+
+
+def icons_table(links, titles, icons, columns=None, href=None):
+    """Renders a 4-column table of icons"""
+    if not columns:
+        columns = 4
+
+    per = int(100.0 / columns)
+    print "<table width=100% cellpadding=5> <tr>"
+    for i in range(0, len(links)):
+        print "<td width=%d%% align=center valign=top>" % per
+        generate_icon(icons[i], titles[i], links[i], href)
+        print "</td>"
+        if i % columns == columns - 1:
+            print "</tr>"
+
+    while i % columns:
+        i += 1
+        print "<td width=%d%%></td>" % per
+    
+    print "</table><p>"
+
+
 ## replace_file_line(file, line, [newline]*)
 def replace_file_line():
     raise NotImplementedError
