@@ -156,7 +156,8 @@ def read_file(file, dict=None):
         try:
             (name, value) = line.split("=")
         except ValueError:
-            raise "Malformed line %s in file %s:" % (repr(line), file)
+            # We fail silently here, because that's the the Perl module does. 
+            continue
         name = name.strip()
         value = value.strip()
         dict[name] = value
