@@ -151,7 +151,8 @@ def read_file(file, dict=None):
         line = line.rstrip()
         if not line:
             continue
-
+        if line.startswith("#"):
+            continue
         try:
             (name, value) = line.split("=")
         except ValueError:
