@@ -500,7 +500,7 @@ def header(title, image=None, help=None, config=None, nomodule=None, nowebmin=No
         theme_header(title, image, help, config, nomodule, nowebmin,
                      rightside, header, body, below)
         return
-    
+
     print "<!doctype html public \"-//W3C//DTD HTML 3.2 Final//EN\">"
     print "<html>"
     if (charset):
@@ -614,7 +614,7 @@ def header(title, image=None, help=None, config=None, nomodule=None, nowebmin=No
                   (gconfig.get("webprefix", ""), text["main_switch"])
         else:
             print "<a href='%s/?cat=%s'> %s </a><br>" % \
-                  (gconfig.get("webprefix", ""), text["header_webmin"])
+                  (gconfig.get("webprefix", ""), module_info.get("category"), text["header_webmin"])
 
     if not nomodule:
         print "<a href='%s/%s'> %s </a><br>" % \
