@@ -13,6 +13,9 @@ import sys
 # Global variables
 #
 session_id = None
+no_acl_check = None
+no_referers_check = None
+
 config = None
 gconfig = None
 module_name = None
@@ -580,7 +583,7 @@ def read_file_cached(file):
 #                else {
 #                        print "&nbsp;|\n";
 #                        }
-#                print "&nbsp;<a href=\"$url\">",&text('main_return', $_[$i+1]),"</a>\n";
+#                print "&nbsp;<a href=\"$url\">",textsub('main_return', $_[$i+1]),"</a>\n";
 #                }
 #        }
 #print "<br>\n";
@@ -1376,9 +1379,12 @@ def init_config():
     $current_theme - The theme currently in use
     $root_directory - The root directory of this webmin install
     """
+    global config, gconfig, module_name, module_config_directory, tb, cb, \
+           scriptname, remote_user, base_remote_user, current_theme, \
+           root_directory, module_root_directory
+    
     # Read the webmin global config file. This contains the OS type and version,
     # OS specific configuration and global options such as proxy servers
-    global gconfig
     gconfig = read_file_cached("$config_directory/config")
     
     # Set PATH and LD_LIBRARY_PATH
@@ -1387,132 +1393,166 @@ def init_config():
 
     if os.environ.has_key("FOREIGN_MODULE_NAME"):
         # In a foreign call - use the module name given
-        global root_directory
         root_directory = os.environ["FOREIGN_ROOT_DIRECTORY"]
         module_name = os.environ["FOREIGN_MODULE_NAME"]
     elif os.environ.has_key("SCRIPT_NAME"):
         sn = os.environ["SCRIPT_NAME"]
-        # FIXME: Är denna rad verkligen korrekt?
         sn = sn.replace(gconfig["webprefix"], "")
+        match = re.search("^\/([^\/]+)\/", sn)
+        if match:
+            module_name = match.group(1)
 
-#        if ($sn =~ / ^\/([^\/]+)\/          /) {
-#                # Get module name from CGI path
-#                $module_name = $1;
-#                }
-#        if ($ENV{'SERVER_ROOT'}) {
-#                $root_directory = $ENV{'SERVER_ROOT'};
-#                }
-#        elsif ($ENV{'SCRIPT_FILENAME'}) {
-#                $root_directory = $ENV{'SCRIPT_FILENAME'};
-#                $root_directory =~ s/$sn$//;
-#                }
-#        }
-#elsif ($0 =~ /^(.*)\/([^\/]+)\/[^\/]+$/) {
-#        # Get module name from command line
-#        $root_directory = $1;
-#        $module_name = $2;
-#        }
-#if ($module_name) {
-#        $module_config_directory = "$config_directory/$module_name";
-#        &read_file_cached("$module_config_directory/config", \%config);
-#        %module_info = &get_module_info($module_name);
-#        $module_root_directory = "$root_directory/$module_name";
-#        }
-#
-## Get the username
-#local $u = $ENV{'BASE_REMOTE_USER'} ? $ENV{'BASE_REMOTE_USER'}
-#                                    : $ENV{'REMOTE_USER'};
-#$base_remote_user = $u;
-#$remote_user = $ENV{'REMOTE_USER'};
-#
-## Set some useful variables
-#$current_theme = defined($gconfig{'theme_'.$remote_user}) ?
-#                    $gconfig{'theme_'.$remote_user} :
-#                 defined($gconfig{'theme_'.$base_remote_user}) ?
-#                    $gconfig{'theme_'.$base_remote_user} :
-#                    $gconfig{'theme'};
-#if ($current_theme) {
-#        &read_file_cached("$root_directory/$current_theme/config", \%tconfig);
-#        }
-#$tb = defined($tconfig{'cs_header'}) ? "bgcolor=#$tconfig{'cs_header'}" :
-#      defined($gconfig{'cs_header'}) ? "bgcolor=#$gconfig{'cs_header'}" :
-#                                       "bgcolor=#9999ff";
-#$cb = defined($tconfig{'cs_table'}) ? "bgcolor=#$tconfig{'cs_table'}" :
-#      defined($gconfig{'cs_table'}) ? "bgcolor=#$gconfig{'cs_table'}" :
-#                                      "bgcolor=#cccccc";
-#$tb .= ' '.$tconfig{'tb'} if ($tconfig{'tb'});
-#$cb .= ' '.$tconfig{'cb'} if ($tconfig{'cb'});
-#$0 =~ /([^\/]+)$/;
-#$scriptname = $1;
-#$webmin_logfile = $gconfig{'webmin_log'} ? $gconfig{'webmin_log'}
-#                                         : "$ENV{'WEBMIN_VAR'}/webmin.log";
-#
-## Load language strings into %text
-#$current_lang = $gconfig{"lang_$remote_user"} ? $gconfig{"lang_$remote_user"} :
-#        $gconfig{"lang_$base_remote_user"} ? $gconfig{"lang_$base_remote_user"} :
-#        $gconfig{"lang"} ? $gconfig{"lang"} : $default_lang;
-#%text = &load_language($module_name);
-#%text || &error("Failed to determine Webmin root from SERVER_ROOT or SCRIPT_FILENAME");
-#
-## Check if the HTTP user can access this module
-#if ($module_name && !$main::no_acl_check &&
-#    !defined($ENV{'FOREIGN_MODULE_NAME'})) {
-#        local(%acl, %minfo);
-#        &read_acl(\%acl, undef);
-#        local $risk = $gconfig{'risk_'.$u};
-#        if ($risk) {
-#                $risk eq 'high' || !$module_info{'risk'} ||
-#                    $module_info{'risk'} =~ /$risk/ ||
-#                        &error(&text('emodule', "<i>$u</i>",
-#                                     "<i>$module_info{'desc'}</i>"));
-#                $user_risk_level = $risk;
-#                $user_skill_level = $gconfig{'skill_'.$u};
-#                }
-#        else {
-#                $acl{$u,$module_name} || $acl{$u,'*'} ||
-#                        &error(&text('emodule', "<i>$u</i>",
-#                                     "<i>$module_info{'desc'}</i>"));
-#                }
-#        $main::no_acl_check++;
-#        }
-#
-## Check the Referer: header for nasty redirects
-#local @referers = split(/\s+/, $gconfig{'referers'});
-#local $referer_site;
-#if ($ENV{'HTTP_REFERER'} =~/^(http|https|ftp):\/\/([^:]+:[^@]+@)?([^\/:@]+)/) {
-#        $referer_site = $3;
-#        }
-#local $http_host = $ENV{'HTTP_HOST'};
-#$http_host =~ s/:\d+$//;
-#if ($0 && $ENV{'SCRIPT_NAME'} !~ /^\/(index.cgi)?$/ && $0 !~ /referer_save\.cgi$/ &&
-#    $0 !~ /session_login\.cgi$/ && !$gconfig{'referer'} &&
-#    $ENV{'MINISERV_CONFIG'} && !$main::no_referers_check &&
-#    $ENV{'HTTP_USER_AGENT'} !~ /^Webmin/i &&
-#    ($referer_site && $referer_site ne $http_host &&
-#     &indexof($referer_site, @referers) < 0 ||
-#    !$referer_site && $gconfig{'referers_none'} && !$trust_unknown_referers)) {
-#        # Looks like a link from elsewhere ..
-#        &header($text{'referer_title'}, "", undef, 0, 1, 1);
-#        print "<hr><center>\n";
-#        print "<form action=/referer_save.cgi>\n";
-#        &ReadParse();
-#        foreach $k (keys %in) {
-#                foreach $kk (split(/\0/, $in{$k})) {
-#                        print "<input type=hidden name=$k value='$kk'>\n";
-#                        }
-#                }
-#        print "<input type=hidden name=referer_original ",
-#              "value='$ENV{'REQUEST_URI'}'>\n";
-#
-#        $prot = lc($ENV{'HTTPS'}) eq 'on' ? "https" : "http";
-#        local $url = "<tt>$prot://$ENV{'HTTP_HOST'}$ENV{'REQUEST_URI'}</tt>";
-#        if ($referer_site) {
-#                print "<p>",&text('referer_warn',
-#                      "<tt>$ENV{'HTTP_REFERER'}</tt>", $url),"<p>\n";
-#                }
-#        else {
-#                print "<p>",&text('referer_warn_unknown', $url),"<p>\n";
-#                }
+        if os.environ.has_key("SERVER_ROOT"):
+            root_directory = os.environ["SERVER_ROOT"]
+        elif os.environ.has_key("SCRIPT_FILENAME"):
+            root_directory = os.environ["SCRIPT_FILENAME"]
+            root_directory = root_directory.replace(sn, "")
+    else:
+        if re.search("^(.*)\/([^\/]+)\/[^\/]+$", sys.argv[0]):
+            root_directory = sys.argv[1]
+            module_name = sys.argv[2]
+
+    if (module_name):
+        module_config_directory = os.path.join(config_directory, module_name)
+        config = read_file_cached(os.path.join(module_config_directory, "config"))
+        module_info = get_module_info(module_name)
+        module_root_directory = os.path.join(root_directory, module_name)
+
+    # Get the username
+    if os.environ.has_key("BASE_REMOTE_USER"):
+        u = os.environ["BASE_REMOTE_USER"]
+    else:
+        u = os.environ["REMOTE_USER"]
+
+    base_remote_user = u
+    remote_user = os.environ["REMOTE_USER"]
+        
+    # Set some useful variables
+    current_theme = gconfig.get("theme_" + remote_user)
+    if not current_theme:
+        current_theme = gconfig.get("theme_" + base_remote_user)
+    if not current_theme:
+        current_theme = gconfig("theme")
+
+    tconfig = {} # FIXME
+    if current_theme:
+        tconfig = read_file_cached(os.path.join(root_directory, current_theme, config))
+
+    tmpdict = {"cs_header" : "bgcolor=#9999ff"}
+    tmpdict.update(gconfig)
+    tmpdict.update(tconfig)
+    tb = tmpdict["cs_header"]
+
+    tmpdict = {"cs_table" : "bgcolor=#cccccc"}
+    tmpdict.update(gconfig)
+    tmpdict.update(tconfig)
+    cb = tmpdict["cs_table"]
+
+    if tconfig.has_key("tb"):
+        tb += " " + tconfig["tb"]
+    if tconfig.has_key("cb"):
+        cb += " " + tconfig["cb"]
+
+    # We assume argv[0] does not end with a slash. 
+    scriptname = re.search("([^\/]+)$", sys.argv[0]).group(1)
+    if gconfig.has_key("webmin_log"):
+        webmin_logfile = gconfig["webmin_log"]
+    else:
+        webmin_logfile = os.path.join(os.environ["WEBMIN_VAR"], "webmin.log")
+        
+    # Load language strings into %text
+    current_lang = gconfig.get("lang_" + remote_user)
+    if not current_lang:
+        current_lang = gconfig("lang_" + base_remote_user)
+    if not current_lang:
+        current_lang = gconfig("lang")
+    if not current_lang:
+        current_lang = default_lang
+
+    text = load_language(module_name)
+    if not text:
+        error("Failed to determine Webmin root from SERVER_ROOT or SCRIPT_FILENAME")
+        
+    # Check if the HTTP user can access this module
+    if (module_name and not no_acl_check and not
+        os.environ.has_key("FOREIGN_MODULE_NAME")):
+        # FIXME: Implement
+        (acl, dummy) = read_acl()
+        risk = gconfig.get("risk_" + u)
+        if risk:
+            # Dummy loop, so we can break out
+            for dummy in [0]:
+                if risk == "high":
+                    break
+                if not module_info.get("risk"):
+                    break
+                if module_info["risk"].find(risk) != -1:
+                    # Found
+                    break
+                error(textsub('emodule', "<i>%s</i>" % u,
+                              "<i>%s</i>" % module_info["desc"])
+        else:
+            # FIXMEl
+            pass
+            #acl = 
+            
+            #                $acl{$u,$module_name} || $acl{$u,'*'} ||
+            error(textsub('emodule', "<i>%s</i>" % u,
+                          "<i>%s</i>" % module_info["desc"])
+            
+        global no_acl_check
+        no_acl_check = 1
+
+    # Check the Referer: header for nasty redirects
+    referers = gconfig.get("referers").split()
+    http_referer = os.environ.get("HTTP_REFERER", "")
+    match = re.search("^(http|https|ftp):\/\/([^:]+:[^@]+@)?([^\/:@]+)", http_referer)
+    if match:
+        referer_site = match.group(3)
+
+    http_host = os.environ.get("HTTP_HOST", "")
+    http_host = re.sub(":\d+$", "", http_host)
+
+    if (sys.argv[0] and
+        not re.search("^\/(index.cgi)?$", os.environ.get("SCRIPT_NAME")) and
+        not re.search("referer_save.cgi$", sys.argv[0]) and
+        not re.search("session_login.cgi$", sys.argv[0]) and
+        not gconfig.has_key("referer") and
+        os.environ.has_key("MINISERV_CONFIG") and
+        not no_referers_check and
+        not re.search("Webmin",  os.environ.get("HTTP_USER_AGENT", ""), re.I) and
+        # Referer site
+        (referer_site and (referer_site != http_host) and
+         not referer_site in referers and
+         gconfig["referers_none"] and not trust_unknown_referers)):
+        # Looks like a link from elsewhere ..
+        header("referer_title", "", None, 0, 1, 1)
+        print "<hr><center>\n"
+        print "<form action=/referer_save.cgi>\n"
+        ReadParse()
+        for k in indata.keys():
+            for kk in indata[k].split("\0"):
+                print "<input type=hidden name=%s value='%s'>" % (k, kk)
+        
+        print "<input type=hidden name=referer_original " \
+              "value='%s'>" % os.environ["REQUEST_URI"]
+
+        if os.environ.get("HTTPS", "").lower() == "on":
+            prot = "https"
+        else:
+            prot = "http"
+
+        url = "<tt>%s://%s%s</tt>" % (prot, os.environ.get("HTTP_HOST"),
+                                      os.environ.get("REQUEST_URI"))
+
+        if (referer_site):
+            print textsub('referer_warn', "<tt>%s</tt>" %
+                          os.environ.get("HTTP_REFERER"), $url), "<p>"
+            
+        else:
+            print "<p>", textsub('referer_warn_unknown', $url), "<p>"
+            
+
 #        print "<input type=submit value='$text{'referer_ok'}'><br>\n";
 #        print "<input type=checkbox name=referer_again value=1> ",
 #              "$text{'referer_again'}<p>\n";
@@ -1569,24 +1609,18 @@ def init_config():
 #local $t = $_[1]->{$_[0]};
 #return defined($t) ? $t : '$'.$_[0];
 #}
-#
-## text(message, [substitute]+)
-#sub text
-#{
-#local $rv = $text{$_[0]};
-#local $i;
-#for($i=1; $i<@_; $i++) {
-#        $rv =~ s/\$$i/$_[$i]/g;
-#        }
-#return $rv;
-#}
-#
-## terror(text params)
-#sub terror
-#{
-#&error(&text(@_));
-#}
-#
+
+def textsub(message, *substitute):
+    rv = text[message]
+    for i in range (0, len(substitute)):
+        # The translation string variables began at $1, thus the +1
+        rv = re.sub("\$%d" % (i + 1), substitute[i], rv)
+    return rv
+
+# This function seems to be unused. Defined anyway. 
+def terror(*params):
+    error(textsub(*params))
+    
 ## encode_base64(string)
 ## Encodes a string into base64 format
 #sub encode_base64
@@ -1804,7 +1838,7 @@ def init_config():
 #        sleep(1);
 #        if ($lock_tries_count++ > 5*60) {
 #                # Give up after 5 minutes
-#                &error(&text('elock_tries', "<tt>$_[0]</tt>", 5));
+#                &error(textsub('elock_tries', "<tt>$_[0]</tt>", 5));
 #                }
 #        }
 #}
@@ -2688,11 +2722,11 @@ def init_config():
 #        if ($_[1]) {
 #                $progress_size = $_[1];
 #                $progress_step = int($_[1] / 10);
-#                print &text('progress_size', $progress_callback_url,
+#                print textsub('progress_size', $progress_callback_url,
 #                            $progress_size),"<br>\n";
 #                }
 #        else {
-#                print &text('progress_nosize', $progress_callback_url),"<br>\n";
+#                print textsub('progress_nosize', $progress_callback_url),"<br>\n";
 #                }
 #        }
 #elsif ($_[0] == 3) {
@@ -2700,16 +2734,16 @@ def init_config():
 #        local $sp = $progress_callback_prefix.("&nbsp;" x 5);
 #        if ($progress_size) {
 #                local $st = int(($_[1] * 10) / $progress_size);
-#                print $sp,&text('progress_data', $_[1], int($_[1]*100/$progress_size)),"<br>\n" if ($st != $progress_step);
+#                print $sp,textsub('progress_data', $_[1], int($_[1]*100/$progress_size)),"<br>\n" if ($st != $progress_step);
 #                $progress_step = $st;
 #                }
 #        else {
-#                print $sp,&text('progress_data2', $_[1]),"<br>\n";
+#                print $sp,textsub('progress_data2', $_[1]),"<br>\n";
 #                }
 #        }
 #elsif ($_[0] == 4) {
 #        # All done downloading
-#        print $progress_callback_prefix,&text('progress_done'),"<br>\n";
+#        print $progress_callback_prefix,textsub('progress_done'),"<br>\n";
 #        }
 #elsif ($_[0] == 5) {
 #        # Got new location after redirect
@@ -2723,7 +2757,7 @@ def init_config():
 #sub switch_to_remote_user
 #{
 #@remote_user_info = getpwnam($remote_user);
-#@remote_user_info || &error(&text('switch_remote_euser', $remote_user));
+#@remote_user_info || &error(textsub('switch_remote_euser', $remote_user));
 #if ($< == 0) {
 #        $( = $remote_user_info[3];
 #        $) = "$remote_user_info[3] ".join(" ", $remote_user_info[3],
