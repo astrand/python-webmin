@@ -52,4 +52,4 @@ dist:
 python-webmin-$(VERSION).tgz: dist
 
 rpm: python-webmin-$(VERSION).tgz
-	rpm -ta python-webmin-$(VERSION).tgz --define="_topdir `pwd`/../../tl/buildarea"
+	rpm -ta python-webmin-$(VERSION).tgz 
