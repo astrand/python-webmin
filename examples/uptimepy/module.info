@@ -1,0 +1,4 @@
+name=UptimePy
+category=system
+desc=Uptime Demo Module (Python)
+depends=0.970
