@@ -271,10 +271,10 @@ def check_ipaddress(ip):
 #}
 #
 
-def generate_icon(image, title, link=None, href=None):
-    if link and href:
+def generate_icon(image, title, link=None):
+    if link:
         print "<table border><tr><td>"
-        print "<a href='%s' %s><img src='%s' alt='' border=0 " % (link, href, image),
+        print "<a href='%s'><img src='%s' alt='' border=0 " % (link, image),
         print "width=48 height=48></a></td></tr></table>"
         print "<a href='%s'>%s</a>" % (link, title)
     else:
@@ -1308,7 +1308,7 @@ def to_ipaddress():
 #}
 
 
-def icons_table(links, titles, icons, columns=None, href=None):
+def icons_table(links, titles, icons, columns=None):
     """Renders a 4-column table of icons"""
     if not columns:
         columns = 4
@@ -1317,7 +1317,7 @@ def icons_table(links, titles, icons, columns=None, href=None):
     print "<table width=100% cellpadding=5> <tr>"
     for i in range(0, len(links)):
         print "<td width=%d%% align=center valign=top>" % per
-        generate_icon(icons[i], titles[i], links[i], href)
+        generate_icon(icons[i], titles[i], links[i])
         print "</td>"
         if i % columns == columns - 1:
             print "</tr>"
