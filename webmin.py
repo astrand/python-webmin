@@ -669,72 +669,67 @@ def header(title, image, help=None, config=None, nomodule=None, nowebmin=None,
 
 
 ## footer([page, name]+, [noendbody])
-## Output a footer for returning to some page
+## 
 
-def footer():
-    raise NotImplementedError
+def footer(links=[], noendbody=None):
+    """Output a footer for returning to some page
+    The links parameter is a list of two-tuples, containing url and name, like:
+    [('', 'module index'), ('list.cgi', 'users list')]
+    
+    """
+    _load_theme_library()
+    # FIXME
+    #if (defined(&theme_footer)) {
+    #        &theme_footer(@_);
+    #        return;
+    #        }
+    for i in range(len(links)):
+        (url, name) = links[i]
+        if url != "/" or tconfig.get("noindex"):
+            if url == "/":
+                url = "/?cat=" + module_info["category"]
+            elif url == "" and module_name:
+                url = "/%s/" % module_name
+            elif url.startswith("?") and module_name:
+                url = "/%s/" + url
+            if url.startswith("/"):
+                url = gconfig["webprefix"] + url
+            if i == 0:
+                print "<a href='%s'><img alg='<-' align=middle border=0 "\
+                      "src=%s/images/left.gif></a>" % (url, gconfig["webprefix"])
+            else:
+                print "&nbsp;|"
+            print "&nbsp;<a href='%s'> %s</a>" % (url, textsub("main_return", name))
+            
+    print "<br>\n";
+    if not noendbody:
+        postbody = tconfig.get("postbody")
+        if postbody:
+            hostname = get_system_hostname()
+            version = get_webmin_version()
+            os_type = gconfig.get("real_os_type")
+            if not os_type:
+                os_type = gconfig.get("os_type")
+            os_version = gconfig.get("real_os_version")
+            if not os_version:
+                os_version = gconfig.get("os_version")
 
-#sub footer
-#{
-#&load_theme_library();
-#if (defined(&theme_footer)) {
-#        &theme_footer(@_);
-#        return;
-#        }
-#local $i;
-#for($i=0; $i+1<@_; $i+=2) {
-#        local $url = $_[$i];
-#        if ($url ne '/' || !$tconfig{'noindex'}) {
-#                if ($url eq '/') {
-#                        $url = "/?cat=$module_info{'category'}";
-#                        }
-#                elsif ($url eq '' && $module_name) {
-#                        $url = "/$module_name/";
-#                        }
-#                elsif ($url =~ /^\?/ && $module_name) {
-#                        $url = "/$module_name/$url";
-#                        }
-#                $url = "$gconfig{'webprefix'}$url" if ($url =~ /^\//);
-#                if ($i == 0) {
-#                        print "<a href=\"$url\"><img alt=\"<-\" align=middle border=0 src=$gconfig{'webprefix'}/images/left.gif></a>\n";
-#                        }
-#                else {
-#                        print "&nbsp;|\n";
-#                        }
-#                print "&nbsp;<a href=\"$url\">",textsub('main_return', $_[$i+1]),"</a>\n";
-#                }
-#        }
-#print "<br>\n";
-#if (!$_[$i]) {
-#        local $postbody = $tconfig{'postbody'};
-#        if ($postbody) {
-#                local $hostname = &get_system_hostname();
-#                local $version = &get_webmin_version();
-#                local $os_type = $gconfig{'real_os_type'} ?
-#                                $gconfig{'real_os_type'} : $gconfig{'os_type'};
-#                local $os_version = $gconfig{'real_os_version'} ?
-#                                $gconfig{'real_os_version'} : $gconfig{'os_version'};
-#                $postbody =~ s/%HOSTNAME%/$hostname/g;
-#                $postbody =~ s/%VERSION%/$version/g;
-#                $postbody =~ s/%USER%/$remote_user/g;
-#                $postbody =~ s/%OS%/$os_type $os_version/g;
-#                print "$postbody\n";
-#                }
-#        if ($tconfig{'postbodyinclude'}) {
-#                open(INC,
-#                 "$root_directory/$current_theme/$tconfig{'postbodyinclude'}");
-#                while(<INC>) {
-#                        print;
-#                        }
-#                close(INC);
-#                }
-#        if (defined(&theme_postbody)) {
-#                &theme_postbody(@_);
-#                }
-#        print "</body></html>\n";
-#        }
-#}
-#
+            postbody.replace("%HOSTNAME%", hostname)
+            postbody.replace("%VERSION%", version)
+            postbody.replace("%USER%", remote_user)
+            postbody.replace("%OS%", os_type + os_version)
+            print postbody
+
+        if tconfig.get("postbodyinclude"):
+            f = open(os.path.join(root_directory, current_theme, tconfig.get("postbodyinclude")))
+            print f.read()
+
+        # FIXME
+        #        if (defined(&theme_postbody)) {
+        #                &theme_postbody(@_);
+        #                }
+        print "</body></html>"
+
 
 def _load_theme_library():
     """Load theme library"""
@@ -1710,7 +1705,7 @@ def init_config():
         no_acl_check = 1
 
     # Check the Referer: header for nasty redirects
-    referers = gconfig.get("referers").split()
+    referers = gconfig.get("referers", "").split()
     http_referer = os.environ.get("HTTP_REFERER", "")
     match = re.search("^(http|https|ftp):\/\/([^:]+:[^@]+@)?([^\/:@]+)", http_referer)
     if match:
