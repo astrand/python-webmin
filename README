@@ -1,0 +1,27 @@
+
+Since there is nothing like $main::no_acl_check in Python, you should
+set variables in the webmin module instead. So, instead of doing:
+
+$no_acl_check++;
+
+you should do:
+
+import webmin
+webmin.no_acl_check = 1
+
+Webmin uses a variable called "in". This is a keyword in Python, so it
+is changed to "indata". 
+
+Webmin does not allow a function and variable to have the same
+name. Therefore, the text substitution function is called "textsub"
+rather than "text". 
+
+Non-public functions are prefixed with underscore. 
+
+In Perl, referencing an associative array with an unknown key does not
+produce any error but rather gives a empty result. This is not true in
+Python. Therefore, it often makes sense to do
+somedictionary.get("somekey", "") instead of
+somedictionary["somekey"]. However, this method is not used for
+translations via the "text" dictionary: We want to notice when a
+translation is missing. 
