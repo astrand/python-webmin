@@ -347,65 +347,66 @@ def copydata():
 #
 
 def ReadParseMime():
+    raise NotImplementedError
     # ReadParseMime
 # Read data submitted via a POST request using the multipart/form-data coding
-sub ReadParseMime
-{
-local ($boundary, $line, $foo, $name);
-$ENV{CONTENT_TYPE} =~ /boundary=(.*)$/;
-$boundary = $1;
-<STDIN>;	# skip first boundary
-while(1) {
-	$name = "";
-	# Read section headers
-	local $lastheader;
-	while(1) {
-		$line = <STDIN>;
-		$line =~ s/\r|\n//g;
-		last if (!$line);
-		if ($line =~ /^(\S+):\s*(.*)$/) {
-			$header{$lastheader = lc($1)} = $2;
-			}
-		elsif ($line =~ /^\s+(.*)$/) {
-			$header{$lastheader} .= $line;
-			}
-		}
-
-	# Parse out filename and type
-	if ($header{'content-disposition'} =~ /^form-data(.*)/) {
-		$rest = $1;
-		while ($rest =~ /([a-zA-Z]*)=\"([^\"]*)\"(.*)/) {
-			if ($1 eq 'name') {
-				$name = $2;
-				}
-			else {
-				$foo = $name . "_$1";
-				$in{$foo} = $2;
-				}
-			$rest = $3;
-			}
-		}
-	else {
-		&error("Missing Content-Disposition header");
-		}
-	if ($header{'content-type'} =~ /^([^\s;]+)/) {
-		$foo = $name . "_content_type";
-		$in{$foo} = $1;
-		}
-
-	# Read data
-	$in{$name} .= "\0" if (defined($in{$name}));
-	while(1) {
-		$line = <STDIN>;
-		if (!$line) { return; }
-		if (index($line, $boundary) != -1) { last; }
-		$in{$name} .= $line;
-		}
-	chop($in{$name}); chop($in{$name});
-	if (index($line,"$boundary--") != -1) { last; }
-	}
-}
-    
+#sub ReadParseMime
+#{
+#local ($boundary, $line, $foo, $name);
+#$ENV{CONTENT_TYPE} =~ /boundary=(.*)$/;
+#$boundary = $1;
+#<STDIN>;	# skip first boundary
+#while(1) {
+#        $name = "";
+#        # Read section headers
+#        local $lastheader;
+#        while(1) {
+#                $line = <STDIN>;
+#                $line =~ s/\r|\n//g;
+#                last if (!$line);
+#                if ($line =~ /^(\S+):\s*(.*)$/) {
+#                        $header{$lastheader = lc($1)} = $2;
+#                        }
+#                elsif ($line =~ /^\s+(.*)$/) {
+#                        $header{$lastheader} .= $line;
+#                        }
+#                }
+#
+#        # Parse out filename and type
+#        if ($header{'content-disposition'} =~ /^form-data(.*)/) {
+#                $rest = $1;
+#                while ($rest =~ /([a-zA-Z]*)=\"([^\"]*)\"(.*)/) {
+#                        if ($1 eq 'name') {
+#                                $name = $2;
+#                                }
+#                        else {
+#                                $foo = $name . "_$1";
+#                                $in{$foo} = $2;
+#                                }
+#                        $rest = $3;
+#                        }
+#                }
+#        else {
+#                &error("Missing Content-Disposition header");
+#                }
+#        if ($header{'content-type'} =~ /^([^\s;]+)/) {
+#                $foo = $name . "_content_type";
+#                $in{$foo} = $1;
+#                }
+#
+#        # Read data
+#        $in{$name} .= "\0" if (defined($in{$name}));
+#        while(1) {
+#                $line = <STDIN>;
+#                if (!$line) { return; }
+#                if (index($line, $boundary) != -1) { last; }
+#                $in{$name} .= $line;
+#                }
+#        chop($in{$name}); chop($in{$name});
+#        if (index($line,"$boundary--") != -1) { last; }
+#        }
+#}
+#    
 
 def ReadParse():
     global indata
@@ -1700,6 +1701,7 @@ def init_config():
         print "<form action=/referer_save.cgi>\n"
         ReadParse()
         for k in indata.keys():
+            # FIXME: This is probably not correct. 
             for kk in indata[k].split("\0"):
                 print "<input type=hidden name=%s value='%s'>" % (k, kk)
         
