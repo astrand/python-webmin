@@ -116,7 +116,7 @@ def read_file_cached(file):
     """Like read_file, but reads from a cache if the file has already been read
     """
     # FIXME
-    return read_file()
+    return read_file(file)
         
 
 ## write_file(file, array)
