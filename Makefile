@@ -11,6 +11,7 @@ install:
 # API module
 	mkdir -p $(WEBMINDIR)
 	mkdir -p $(WEBMINDIR)/mscstyle3
+	install setup.sh $(WEBMINDIR)
 # FIXME: Compile 
 	install webmin.py $(WEBMINDIR)
 	install themes/mscstyle3/theme.py $(WEBMINDIR)/mscstyle3/
@@ -44,6 +45,7 @@ install-examples:
 
 dist: 
 	(cd ..; tar zcvf python-webmin/python-webmin-$(VERSION).tgz \
+	python-webmin/setup.sh\
 	python-webmin/Makefile\
 	python-webmin/webmin.py\
 	python-webmin/python-webmin.spec\
@@ -62,4 +64,4 @@ dist:
 python-webmin-$(VERSION).tgz: dist
 
 rpm: python-webmin-$(VERSION).tgz
-	rpm -ta python-webmin-$(VERSION).tgz 
+	rpmbuild -ta python-webmin-$(VERSION).tgz 
