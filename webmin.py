@@ -119,7 +119,7 @@ def read_file(file, dict=None):
     Note: Currently there is not way to check if the read failed or not.
     This function should probably raise an exception on error. 
     """
-    if not dict:
+    if dict == None:
         dict = {}
     
     try:
@@ -139,6 +139,7 @@ def read_file(file, dict=None):
         value = value.strip()
         dict[name] = value
 
+
     return dict
 
 
@@ -146,8 +147,9 @@ def read_file_cached(file, dict=None):
     """Like read_file, but reads from a cache if the file has already been read
     """
     # FIXME
-    if not dict:
+    if dict == None:
         dict = {}
+
     return read_file(file, dict)
         
 
@@ -1024,39 +1026,61 @@ def _restart_miniserv():
 #if ($i == 20) { &error("Failed to restart Webmin server!"); }
 #}
 #
-## check_os_support(&minfo)
-#sub check_os_support
-def _check_os_support():
-    raise NotImplementedError
-#{
-#local $oss = $_[0]->{'os_support'};
-#return 1 if (!$oss || $oss eq '*');
-#while(1) {
-#        local ($os, $ver, $codes);
-#        if ($oss =~ /^([^\/\s]+)\/([^\{\s]+)\{([^\}]*)\}\s*(.*)$/) {
-#                $os = $1; $ver = $2; $codes = $3; $oss = $4;
-#                }
-#        elsif ($oss =~ /^([^\/\s]+)\/([^\/\s]+)\s*(.*)$/) {
-#                $os = $1; $ver = $2; $oss = $3;
-#                }
-#        elsif ($oss =~ /^([^\{\s]+)\{([^\}]*)\}\s*(.*)$/) {
-#                $os = $1; $codes = $2; $oss = $3;
-#                }
-#        elsif ($oss =~ /^\{([^\}]*)\}\s*(.*)$/) {
-#                $codes = $1; $oss = $2;
-#                }
-#        elsif ($oss =~ /^(\S+)\s*(.*)$/) {
-#                $os = $1; $oss = $2;
-#                }
-#        else { last; }
-#        next if ($os && $os ne $gconfig{'os_type'});
-#        next if ($ver && $ver ne $gconfig{'os_version'});
-#        next if ($codes && !eval $codes);
-#        return 1;
-#        }
-#return 0;
-#}
-#
+
+def check_os_support(minfo):
+    oss = minfo.get("os_support")
+    if not oss or oss == "*":
+        # No problem
+        return
+
+    os = ver = codes = None
+
+    while 1:
+        match = re.search("^([^\/\s]+)\/([^\{\s]+)\{([^\}]*)\}\s*(.*)$", oss)
+        if match:
+            os = match.group(1)
+            ver = match.group(2)
+            codes = match.group(3)
+            oss = match.group(4)
+        else:
+            match = re.search("^([^\/\s]+)\/([^\/\s]+)\s*(.*)$", oss)
+            if match:
+                os = match.group(1)
+                ver = match.group(2)
+                oss = match.group(3)
+            else:
+                match = re.search("^([^\{\s]+)\{([^\}]*)\}\s*(.*)$", oss)
+                if match:
+                    os = match.group(1)
+                    codes = match.group(2)
+                    oss = match.group(3)
+                else:
+                    match = re.search("^\{([^\}]*)\}\s*(.*)$", oss)
+                    if match:
+                        codes = match.group(1)
+                        oss = match.group(2)
+                    else:
+                        match = re.search("^(\S+)\s*(.*)$", oss)
+                        if match:
+                            os = match.group(1)
+                            oss = match.group(2)
+                        else:
+                            # Couldn't parse
+                            return 0
+
+        if os and os != gconfig.get("os_type"):
+            continue
+        if ver and ver != gconfig.get("os_version"):
+            continue
+        if codes:
+            # FIXME: Do something like below, but check quoting. 
+            #os.system("""perl -e 'exit(%s);'""")
+            continue
+        # No problem
+        return 1
+
+
+
 ## http_download(host, port, page, destfile, [&error], [&callback])
 
 def http_download():
@@ -1901,47 +1925,53 @@ def get_all_module_infos(nocache=None):
     install, including clones, like:
     [{"name": "mysql", "desc_sv": "MySQL-databasserver"}]
     """
-    # Dictionary of dictionaries, during cache read
+    # Dict with dicts. Key is "modulename variable".
+    cache_dict = {}
+    # Dict with dicts with minfos. Key is "modulename".
+    all_modules_dict = {}
+    
     cache_file = os.path.join(config_directory, "module.infos.cache")
-    cache = read_file_cached(cache_file)
+    cache_dict = read_file_cached(cache_file)
     st = os.stat(root_directory)
-    all_modules = {}        
-    if not nocache and cache.get("lang") == current_lang and \
-       cache.get("mtime") == str(st.st_mtime):
+    if not nocache and cache_dict.get("lang") == current_lang and \
+           cache_dict.get("mtime") == str(st.st_mtime):
         # Can use existing module.info cache
         print "Using cache"
-        for k in cache.keys():
+        for k in cache_dict.keys():
             try:
+                # Try to split this key. 
                 (module, variable) = k.split(None, 1)
             except ValueError:
                 # Malformed line (or mtime=) or something like that
                 continue
-            value = cache[k]
+            value = cache_dict[k]
             try:
-                modinfo = all_modules[module]
+                modinfo = all_modules_dict[module]
             except KeyError:
-                all_modules[module] = modinfo = {}
+                all_modules_dict[module] = modinfo = {}
 
             modinfo[variable] = value
 
     else:
         # Need to rebuild cache
         print "Rebuilding module"
+        # Dictionary of dictionaries, during cache read
         for entry in os.listdir(root_directory):
             # Only deal with directories
-            if not os.path.isdir(entry): continue
+            if not os.path.isdir(os.path.join(root_directory, entry)): continue
             modinfo = get_module_info(entry)
             if not modinfo: continue
             for variable in modinfo.keys():
-                all_modules["%s %s" % (entry, variable)] = modinfo[variable]
+                cache_dict["%s %s" % (entry, variable)] = modinfo[variable]
+            all_modules_dict[entry] = modinfo
 
-        all_modules["lang"] = current_lang
-        all_modules["mtime"] = str(st.st_mtime)
+        cache_dict["lang"] = current_lang
+        cache_dict["mtime"] = str(st.st_mtime)
         if not nocache:
-            write_file(cache_file, all_modules)
+            write_file(cache_file, cache_dict)
             
     # Return list of module info dictionaries
-    return all_modules.values()
+    return all_modules_dict.values()
 
 
 ## Need to rebuild cache
