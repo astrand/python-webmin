@@ -26,12 +26,14 @@ if IsUsermin:
      pytheme_logo = "/usermin_logo.gif"
      pytheme_logo_link ="http://www.usermin.com/"
      pytheme_logo_alt = "Usermin homepage"
+     module_infos_access=1
 else:
      available = ["webmin", "system", "servers", "cluster", "hardware", 
                   "", "net", "kororaweb"]
      pytheme_logo = "/images/top_bar/webmin_logo.jpg"
      pytheme_logo_link ="http://www.webmin.com/"
      pytheme_logo_alt = "Webmin homepage"
+     module_infos_access=0
 
 letter_sizes = {
 	'100.gif': [ 10, 16 ],
@@ -273,7 +275,7 @@ def theme_header(title, image=None, help=None, config=None, nomodule=None, noweb
                get_system_hostname(), os_type, os_version)
         print "</SCRIPT>"
 
-    msc_modules = get_all_module_infos()
+    msc_modules = get_all_module_infos(module_infos_access)
 
     print "</head>"
 
