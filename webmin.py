@@ -1480,10 +1480,10 @@ def init_config():
     if not current_theme:
         current_theme = gconfig.get("theme_" + base_remote_user)
     if not current_theme:
-        current_theme = gconfig("theme")
+        current_theme = gconfig.get("theme", "")
 
     if current_theme:
-        tconfig = read_file_cached(os.path.join(root_directory, current_theme, config))
+        tconfig = read_file_cached(os.path.join(root_directory, current_theme, "config"))
 
     tmpdict = {"cs_header" : "bgcolor=#9999ff"}
     tmpdict.update(gconfig)
