@@ -77,6 +77,7 @@ force_charset = None
 user_module_config_directory = None
 pragma_no_cache = None
 loaded_theme_library = None
+module_info = None
 
 #
 # Perl compat functions
@@ -1565,7 +1566,7 @@ def init_config():
     """
     global config, gconfig, module_name, module_config_directory, tb, cb, \
            scriptname, remote_user, base_remote_user, current_theme, \
-           root_directory, module_root_directory
+           root_directory, module_root_directory, module_info
     global no_acl_check, no_referers_check, current_lang, text
 
     # Read the webmin global config file. This contains the OS type and version,
