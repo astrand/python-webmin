@@ -52,9 +52,10 @@ action_id_count = None
 done_seed_random = None
 
 # Misc
+text = {}
 tconfig = {} 
-config = None
-gconfig = None
+config = {}
+gconfig = {}
 module_name = None
 module_config_directory = None
 tb = None
@@ -66,6 +67,8 @@ current_theme = None
 root_directory = None
 module_root_directory = None
 module_categories = {}
+
+default_lang = "en"
 
 
 #
@@ -94,15 +97,15 @@ except KeyError: pass
 #@INC = &unique(@INC, ".");
 #
 
-def read_file(file):
-    """Read a file and return a dictionary with name=value pairs from a file
+def read_file(file, dict={}):
+    """Return a dictionary with name=value pairs from a file
+    If an existing dictionary is given, it will be updated
+    Note: Currently there is not way to check if the read failed or not.
+    This function should probably raise an exception on error. 
     """
-    dict = {}
     try:
         f = open(file)
     except:
-        # web-lib.pl actually returns on all open errors. I think this is crazy, but
-        # we does as web-lib.pl. 
         return dict
     for line in f:
         # Get rid of \n
@@ -119,11 +122,11 @@ def read_file(file):
     return dict
 
 
-def read_file_cached(file):
+def read_file_cached(file, dict={}):
     """Like read_file, but reads from a cache if the file has already been read
     """
     # FIXME
-    return read_file(file)
+    return read_file(file, dict)
         
 
 ## write_file(file, array)
@@ -1432,7 +1435,8 @@ def init_config():
 
     # Read the webmin global config file. This contains the OS type and version,
     # OS specific configuration and global options such as proxy servers
-    gconfig = read_file_cached(os.path.join(config_directory, "config"))
+    read_file_cached(os.path.join(config_directory, "config"),
+                     gconfig)
 
     # Set PATH and LD_LIBRARY_PATH
     if gconfig.has_key("path"): os.environ["PATH"] = gconfig["path"]
@@ -1483,7 +1487,8 @@ def init_config():
         current_theme = gconfig.get("theme", "")
 
     if current_theme:
-        tconfig = read_file_cached(os.path.join(root_directory, current_theme, "config"))
+        read_file_cached(os.path.join(root_directory, current_theme, "config"),
+                         tconfig)
 
     tmpdict = {"cs_header" : "bgcolor=#9999ff"}
     tmpdict.update(gconfig)
@@ -1510,9 +1515,9 @@ def init_config():
     # Load language strings into %text
     current_lang = gconfig.get("lang_" + remote_user)
     if not current_lang:
-        current_lang = gconfig("lang_" + base_remote_user)
+        current_lang = gconfig.get("lang_" + base_remote_user)
     if not current_lang:
-        current_lang = gconfig("lang")
+        current_lang = gconfig.get("lang")
     if not current_lang:
         current_lang = default_lang
 
@@ -1611,42 +1616,59 @@ def init_config():
 #
 #$default_lang = "en";
 #
-## load_language(module)
-## Returns a hashtable mapping text codes to strings in the appropriate language
-#sub load_language
-#{
-#local %text;
-#local $root = $root_directory;
-#local $ol = $gconfig{'overlang'};
-#
-## Read global lang files
-#&read_file_cached("$root/lang/$default_lang", \%text) || return ();
-#&read_file_cached("$root/lang/$current_lang", \%text)
-#        if ($default_lang ne $current_lang);
-#if ($ol) {
-#        &read_file_cached("$root/$ol/$default_lang", \%text);
-#        &read_file_cached("$root/$ol/$current_lang", \%text)
-#                if ($default_lang ne $current_lang);
-#        }
-#&read_file_cached("$config_directory/custom-lang", \%text);
-#
-#if ($_[0]) {
-#        # Read module's lang files
-#        &read_file_cached("$root/$_[0]/lang/$default_lang", \%text);
-#        &read_file_cached("$root/$_[0]/lang/$current_lang", \%text)
-#                if ($default_lang ne $current_lang);
-#        if ($ol) {
-#                &read_file_cached("$root/$_[0]/$ol/$default_lang", \%text);
-#                &read_file_cached("$root/$_[0]/$ol/$current_lang", \%text)
-#                        if ($default_lang ne $current_lang);
-#                }
-#        &read_file_cached("$config_directory/$_[0]/custom-lang", \%text);
-#        }
-#foreach $k (keys %text) {
-#        $text{$k} =~ s/\$([A-Za-z0-9\.\-\_]+)/text_subs($1,\%text)/ge;
-#        }
-#return %text;
-#}
+
+def load_language(module=None):
+    """Returns a hashtable mapping text codes to strings in the appropriate language"""
+    root = root_directory
+    ol = gconfig.get("overlang", "")
+
+    # Read global lang files
+    local_text = read_file_cached(os.path.join(root, "lang", default_lang))
+    
+    if not local_text:
+        return {}
+    if default_lang != current_lang:
+        read_file_cached(os.path.join(root, "lang", current_lang),
+                         local_text)
+    if ol:
+        read_file_cached(os.path.join(root, ol, default_lang),
+                         local_text)
+
+        if default_lang != current_lang:
+            read_file_cached(os.path.join(root, ol, current_lang),
+                             local_text)
+                                      
+    read_file_cached(os.path.join(config_directory, "custom-lang"),
+                     local_text)
+
+    if module:
+        # Read module's lang files
+        read_file_cached(os.path.join(root, module, "lang", default_lang),
+                         local_text)
+        if default_lang != current_lang:
+            read_file_cached(os.path.join(root, module, "lang", current_lang),
+                             local_text)
+        if ol:
+            read_file_cached(os.path.join(root, module, ol, default_lang),
+                             local_text)
+            if default_lang != current_lang:
+                read_file_cached(os.path.join(root, module, ol, current_lang),
+                                 local_text)
+        read_file_cached(os.path.join(config_directory, module, "custom-lang"),
+                         local_text)
+        
+    for key in local_text.keys():
+        match = re.search("\$([A-Za-z0-9\.\-\_]+)", local_text[key])
+        # FIXME
+        #local_text = re.sub("\$([A-Za-z0-9\.\-\_]+)",
+        #                    lambda match: text_subs(match.group(1), local_text))
+
+    return local_text
+
+
+def text_subs():
+    # FIXME
+    return 
 #
 #sub text_subs
 #{
