@@ -63,6 +63,9 @@ config = {}
 gconfig = {}
 module_name = None
 module_config_directory = None
+# In web-lib.pl, tb is either "" or "bgcolor=#something". I think this
+# is ugly and it makes it hard to use HTMLgen. In webmin.py, tb is
+# either None or the color string like "#9999ff". Same goes for cb. 
 tb = None
 cb = None
 scriptname = None
@@ -1630,20 +1633,20 @@ def init_config():
         read_file_cached(os.path.join(root_directory, current_theme, "config"),
                          tconfig)
 
-    tmpdict = {"cs_header" : "bgcolor=#9999ff"}
+    tmpdict = {"cs_header" : "#9999ff"}
     tmpdict.update(gconfig)
     tmpdict.update(tconfig)
     tb = tmpdict["cs_header"]
 
-    tmpdict = {"cs_table" : "bgcolor=#cccccc"}
+    tmpdict = {"cs_table" : "#cccccc"}
     tmpdict.update(gconfig)
     tmpdict.update(tconfig)
     cb = tmpdict["cs_table"]
 
     if tconfig.has_key("tb"):
-        tb += " " + tconfig["tb"]
+        tb = tconfig["tb"]
     if tconfig.has_key("cb"):
-        cb += " " + tconfig["cb"]
+        cb = tconfig["cb"]
 
     # We assume argv[0] does not end with a slash. 
     scriptname = re.search("([^\/]+)$", sys.argv[0]).group(1)
