@@ -1287,16 +1287,19 @@ def to_ipaddress():
 #}
 
 
-def icons_table(links, titles, icons, columns=None):
-    """Renders a 4-column table of icons"""
+def icons_table(iconlist, columns=None):
+    """Renders a 4-column table of icons
+    The argument is a list of tuples (link, title, icon). 
+    """
     if not columns:
-        columns = 4
+        columns = min(4, len(iconlist))
 
     per = int(100.0 / columns)
     print "<table width=100% cellpadding=5> <tr>"
-    for i in range(0, len(links)):
+    for i in range(0, len(iconlist)):
+        (link, title, icon) = iconlist[i]
         print "<td width=%d%% align=center valign=top>" % per
-        generate_icon(icons[i], titles[i], links[i])
+        generate_icon(icon, title, link)
         print "</td>"
         if i % columns == columns - 1:
             print "</tr>"
