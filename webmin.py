@@ -675,10 +675,6 @@ def header(title, image=None, help=None, config=None, nomodule=None, nowebmin=No
     print "</td></tr></table>"
 
 
-
-## footer([page, name]+, [noendbody])
-## 
-
 def footer(links=[], noendbody=None):
     """Output a footer for returning to some page
     The links parameter is a list of two-tuples, containing url and name, like:
@@ -689,10 +685,10 @@ def footer(links=[], noendbody=None):
     if webmin_module.has_key("theme_footer"):
         theme_footer(links, noendbody)
         return
-    
+
     for i in range(len(links)):
         (url, name) = links[i]
-        if url != "/" or tconfig.get("noindex"):
+        if url != "/" or not tconfig.get("noindex"):
             if url == "/":
                 url = "/?cat=" + module_info["category"]
             elif url == "" and module_name:
