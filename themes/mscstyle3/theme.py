@@ -208,7 +208,6 @@ available = ["webmin", "system", "servers", "cluster", "hardware", "", "net",
 
 def theme_header(title, image=None, help=None, config=None, nomodule=None, nowebmin=None,
                  rightside="", header=None, body=None, below=None):
-    available = ["webmin", "system", "servers", "cluster", "hardware", "", "net", "kororaweb"]
     acl = read_acl()
 
     for l in list_languages():
