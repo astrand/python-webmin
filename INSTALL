@@ -1,0 +1,52 @@
+Install python-webmin
+================
+
+For Webmin:
+-----------
+
+If Webmin is install in "usr/libexec/webmin" then you can just type:
+
+make install
+
+If Webmin is installed in an other path:
+
+make install WEBMINDIR=[path to Webmin]
+
+Example:
+make install WEBMINDIR=/usr/local/webmin-1.130
+
+For Usermin:
+------------
+
+Similar as the Webmin installation:
+
+If Usermin is install in "usr/libexec/usermin" then you can just type:
+
+make install-usermin
+
+If Usermin is installed in an other path:
+
+make install-usermin USERMINDIR=[path to Usermin]
+
+Example:
+make install-usermin USERMINDIR=/usr/local/usermin-1.05
+
+
+Installing the examples:
+------------------------
+
+type
+
+make install-examples
+
+or if Webmin is installed in an other path than "/usr/libexec/webmin":
+
+make install-examples WEBMINDIR=[path to Webmin]
+(see the Webmin installation)
+
+You also have to delete /etc/webmin/module.infos.cache to list the examples
+in the Webmin module config page. (see  
+http://www.webmin.com/modules.html#files "When you first create a new module...")
+This is necessary because "make install-examples" doesn't install the examples 
+through the Webmin modules install page.
+
