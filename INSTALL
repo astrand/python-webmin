@@ -1,36 +1,19 @@
 Install python-webmin
-================
+======================
 
-For Webmin:
------------
+For Webmin and Usermin:
+-----------------------
 
-If Webmin is install in "usr/libexec/webmin" then you can just type:
+just type
 
 make install
 
-If Webmin is installed in an other path:
+to install python-webmin in /opt/python-webmin.
+Then run
 
-make install WEBMINDIR=[path to Webmin]
+setup.sh
 
-Example:
-make install WEBMINDIR=/usr/local/webmin-1.130
-
-For Usermin:
-------------
-
-Similar as the Webmin installation:
-
-If Usermin is install in "usr/libexec/usermin" then you can just type:
-
-make install-usermin
-
-If Usermin is installed in an other path:
-
-make install-usermin USERMINDIR=[path to Usermin]
-
-Example:
-make install-usermin USERMINDIR=/usr/local/usermin-1.05
-
+to create a link file (python-webmin.pth) in {python libpath}/site-packages.
 
 Installing the examples:
 ------------------------
