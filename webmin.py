@@ -311,6 +311,8 @@ def urlize():
 #}
 #
 ## un_urlize(string)
+def un_urlize():
+    raise NotImplementedError
 ## Converts a URL-encoded string to the original
 #sub un_urlize
 #{
@@ -444,6 +446,10 @@ def ReadParse():
 #
 ## PrintHeader
 ## Outputs the HTTP header for HTML
+
+def _PrintHeader():
+    raise NotImplementedError
+
 #sub PrintHeader
 #{
 #print "pragma: no-cache\n" if ($pragma_no_cache || $config{'pragma_no_cache'});
@@ -714,6 +720,8 @@ def footer():
 #
 ## load_theme_library()
 ## For internal use only
+def _load_theme_library():
+    raise NotImplementedError
 #sub load_theme_library
 #{
 #return if (!$current_theme || !$tconfig{'functions'} ||
@@ -820,6 +828,10 @@ def error(*message):
                 print >> sys.stderr, msg
         print "<hr>"
         footer()
+
+def _error_setup():
+    # Note: this is probably a public function, although it is not lised on http://www.webmin.com/modules.html
+    raise NotImplementedError
 
 ## error_setup(message)
 ## Register a message to be prepended to all error strings
@@ -951,18 +963,21 @@ def read_acl():
 #
 ## acl_filename()
 ## Returns the file containing the webmin ACL
+def _acl_filename():
+    raise NotImplementedError
 #sub acl_filename
 #{
 #return "$config_directory/webmin.acl";
 #}
 #
-## acl_check()
-## Does nothing, but kept around for compatability
-#sub acl_check
-#{
-#}
-#
+
+# Does nothing, but kept around for compatability
+def acl_check():
+    pass
+
 ## get_miniserv_config(&array)
+def _get_miniserv_config():
+    raise NotImplementedError
 ## Store miniserv configuration into the given array
 #sub get_miniserv_config
 #{
@@ -970,6 +985,8 @@ def read_acl():
 #}
 #
 ## put_miniserv_config(&array)
+def _put_miniserv_config():
+    raise NotImplementedError
 ## Store miniserv configuration from the given array
 #sub put_miniserv_config
 #{
@@ -978,6 +995,8 @@ def read_acl():
 #
 ## restart_miniserv()
 ## Send a HUP signal to miniserv
+def _restart_miniserv():
+    raise NotImplementedError
 #sub restart_miniserv
 #{
 #local($pid, %miniserv, $addr, $i);
@@ -1003,6 +1022,8 @@ def read_acl():
 #
 ## check_os_support(&minfo)
 #sub check_os_support
+def _check_os_support():
+    raise NotImplementedError
 #{
 #local $oss = $_[0]->{'os_support'};
 #return 1 if (!$oss || $oss eq '*');
@@ -1055,6 +1076,8 @@ def http_download():
 #
 ## complete_http_download(handle, destfile, [&error], [&callback])
 ## Do a HTTP download, after the headers have been sent
+def _complete_http_download():
+    raise NotImplementedError
 #sub complete_http_download
 #{
 #local($line, %header, $s);
@@ -1182,6 +1205,8 @@ def ftp_download():
 #
 ## no_proxy(host)
 ## Checks if some host is on the no proxy list
+def _no_proxy():
+    raise NotImplementedError
 #sub no_proxy
 #{
 #foreach $n (split(/\s+/, $gconfig{'noproxy'})) {
@@ -1191,6 +1216,8 @@ def ftp_download():
 #}
 #
 ## open_socket(host, port, handle, [&error])
+def _open_socket():
+    raise NotImplementedError
 #sub open_socket
 #{
 #local($addr, $h); $h = $_[2];
@@ -1213,6 +1240,8 @@ def ftp_download():
 #
 ## download_timeout()
 ## Called when a download times out
+def _download_timeout():
+    raise NotImplementedError
 #sub download_timeout
 #{
 #&error("Timeout downloading $in{url}");
@@ -1221,6 +1250,8 @@ def ftp_download():
 #
 ## ftp_command(command, expected, [&error])
 ## Send an FTP command, and die if the reply is not what was expected
+def _ftp_command():
+    raise NotImplementedError
 #sub ftp_command
 #{
 #local($line, $rcode, $reply);
@@ -1348,6 +1379,8 @@ def flush_file_lines():
 #
 ## unix_user_input(fieldname, user)
 ## Returns HTML for an input to select a Unix user
+def _unix_user_input():
+    raise NotImplementedError
 #sub unix_user_input
 #{
 #return "<input name=$_[0] size=8 value=\"$_[1]\"> ".
@@ -1356,6 +1389,8 @@ def flush_file_lines():
 #
 ## unix_group_input(fieldname, user)
 ## Returns HTML for an input to select a Unix group
+def _unix_group_input():
+    raise NotImplementedError
 #sub unix_group_input
 #{
 #return "<input name=$_[0] size=8 value=\"$_[1]\"> ".
@@ -1824,6 +1859,8 @@ def encode_base64():
 #}
 #
 ## decode_base64(string)
+def decode_base64():
+    raise NotImplementedError
 ## Converts a base64 string into plain text
 #sub decode_base64
 #{
@@ -2221,6 +2258,8 @@ def webmin_log():
 ## additional_log(type, object, data)
 ## Records additional log data for an upcoming call to webmin_log, such
 ## as command that was run or SQL that was executed.
+def additional_log():
+    raise NotImplementedError
 #sub additional_log
 #{
 #if ($gconfig{'logfiles'}) {
@@ -2446,6 +2485,8 @@ def remote_error_setup():
 ## Calls rpc.cgi on some server and passes it a perl structure (hash,array,etc)
 ## and then reads back a reply structure
 #sub remote_rpc_call
+def _remote_rpc_call():
+    raise NotImplementedError
 #{
 #local $serv;
 #if ($_[0]) {
@@ -2629,6 +2670,8 @@ def remote_error_setup():
 ## serialise_variable(variable)
 ## Converts some variable (maybe a scalar, hash ref, array ref or scalar ref)
 ## into a url-encoded string
+def _serialize_variable():
+    raise NotImplementedError
 #sub serialise_variable
 #{
 #if (!defined($_[0])) {
@@ -2659,6 +2702,8 @@ def remote_error_setup():
 ## unserialise_variable(string)
 ## Converts a string created by serialise_variable() back into the original
 ## scalar, hash ref, array ref or scalar ref.
+def _unserialise_variable:
+    raise NotImplementedError
 #sub unserialise_variable
 #{
 #local @v = split(/,/, $_[0]);
@@ -2720,6 +2765,8 @@ def date_chooser_button():
 #}
 #
 ## help_file(module, file)
+def _help_file():
+    raise NotImplementedError
 ## Returns the path to a module's help file
 #sub help_file
 #{
