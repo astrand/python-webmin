@@ -476,12 +476,7 @@ def header(title, image=None, help=None, config=None, nomodule=None, nowebmin=No
                      rightside, header, body, below)
         return
 
-    print "<!doctype html public \"-//W3C//DTD HTML 3.2 Final//EN\">"
-    print "<html>"
-    if (charset):
-        print "<meta http-equiv=\"Content-Type\" "\
-              "content=\"text/html; charset=%s\">" % charset
-    print "<link rel='icon' href='/images/webmin_icon.png' type='image/png'>"        
+    print "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\"\n\"http://www.w3.org/TR/REC-html40/loose.dtd\">"
 
     if gconfig.has_key("real_os_type"):
         os_type = gconfig["real_os_type"]
@@ -493,7 +488,12 @@ def header(title, image=None, help=None, config=None, nomodule=None, nowebmin=No
     else:
         os_version = gconfig["os_version"]
 
-    print "<head>"
+    print "<html>\n<head>"
+    if (charset):
+        print "<meta http-equiv=\"Content-Type\" "\
+              "content=\"text/html; charset=%s\">" % charset
+    print "<link rel='icon' href='/images/webmin_icon.png' type='image/png'>"
+
     if gconfig.get("sysinfo") == 1:
         print "<title>%s : %s on %s (%s %s)</title>" % \
               (title, remote_user, get_system_hostname(), os_type, os_version)
