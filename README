@@ -11,6 +11,10 @@ For up-to-date information about python-webmin, take a look at
 http://www.cendio.se/~peter/python-webmin/. 
 
 
+Requirements
+------------
+Python 2.2 (or newer) is required. 
+
 
 Various notes
 -------------
