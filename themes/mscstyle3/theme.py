@@ -19,9 +19,22 @@
 
 from HTMLgen import *
 
-IsUsermin = 0
+# Choose if you use Usermin or Webmin
+# IsUsermin=0 for Webmin, IsUsermin=1 for Usermin
+# or IsUsermin="auto" for autodetection (default)
+IsUsermin="auto"
 
-if IsUsermin:
+# --- no need to change anything below ---
+
+# try autodetect
+if IsUsermin=="auto":
+    try:
+        if module_info and  module_info.get('usermin'):
+            IsUsermin = 1
+    except:
+        IsUsermin=0
+
+if IsUsermin == 1:
      available = ["usermin", "mail", "login", "apps", ""]
      pytheme_logo = "/usermin_logo.gif"
      pytheme_logo_link ="http://www.usermin.com/"
