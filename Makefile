@@ -1,4 +1,4 @@
-VERSION=0.1pre
+VERSION=0.2pre
 ROOTDIR=/
 WEBMINDIR=$(ROOTDIR)/usr/libexec/webmin
 
@@ -9,8 +9,10 @@ all:
 install:
 # API module
 	mkdir -p $(WEBMINDIR)
+	mkdir -p $(WEBMINDIR)/mscstyle3
 # FIXME: Compile 
 	install webmin.py $(WEBMINDIR)
+	install themes/mscstyle3/theme.py $(WEBMINDIR)/mscstyle3/
 
 install-examples:
 # Python example module
@@ -35,6 +37,7 @@ dist:
 	python-webmin/Makefile\
 	python-webmin/webmin.py\
 	python-webmin/python-webmin.spec\
+	python-webmin/themes/mscstyle3/theme.py \
 	python-webmin/examples/uptimepl/index.cgi\
 	python-webmin/examples/uptimepl/images/icon.gif\
 	python-webmin/examples/uptimepl/config\
@@ -49,4 +52,4 @@ dist:
 python-webmin-$(VERSION).tgz: dist
 
 rpm: python-webmin-$(VERSION).tgz
-	rpm -ta python-webmin-$(VERSION).tgz
+	rpm -ta python-webmin-$(VERSION).tgz --define="_topdir `pwd`/../../tl/buildarea"
