@@ -11,10 +11,12 @@ import sys
 
 #
 # Global variables
+# Make sure to define these as global in funtions, if you want to change them. 
 #
 session_id = None
 no_acl_check = None
 no_referers_check = None
+tconfig = {} 
 
 config = None
 gconfig = None
@@ -1364,6 +1366,8 @@ def read_file_cached(file):
 #}
 #
 
+# Note: I think this function is too long. The reason why I'm not splitting it is
+# that I want to stay as close to web-lib.pl as possible. 
 def init_config():
     """Sets the following global (for the webmin module) variables
     %config - Per-module configuration
@@ -1434,7 +1438,6 @@ def init_config():
     if not current_theme:
         current_theme = gconfig("theme")
 
-    tconfig = {} # FIXME
     if current_theme:
         tconfig = read_file_cached(os.path.join(root_directory, current_theme, config))
 
@@ -1495,7 +1498,6 @@ def init_config():
             # FIXMEl
             pass
             #acl = 
-            
             #                $acl{$u,$module_name} || $acl{$u,'*'} ||
             error(textsub('emodule', "<i>%s</i>" % u,
                           "<i>%s</i>" % module_info["desc"])
@@ -1551,15 +1553,18 @@ def init_config():
             
         else:
             print "<p>", textsub('referer_warn_unknown', $url), "<p>"
-            
+        print "<input type=submit value='%s'><br>" % text["referer_ok"]
+        print "<input type=checkbox name=referer_again value=1> ", \
+              text["referer_again"], "<p>"
+        print "</form></center><hr>"
+        footer("/", text['index'])
+        return
 
-#        print "<input type=submit value='$text{'referer_ok'}'><br>\n";
-#        print "<input type=checkbox name=referer_again value=1> ",
-#              "$text{'referer_again'}<p>\n";
-#        print "</form></center><hr>\n";
-#        &footer("/", $text{'index'});
-#        exit;
-#        }
+    global no_referers_check
+    no_referers_check = 1
+    return 1
+
+
 #$main::no_referers_check++;
 #
 #return 1;
