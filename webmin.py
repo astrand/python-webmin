@@ -27,6 +27,7 @@ import socket
 import os
 import sys
 import re
+import types
 
 #
 # Global variables
@@ -71,7 +72,10 @@ module_categories = {}
 current_lang = "en"
 default_lang = "en"
 list_languages_cache = []
-
+force_charset = None
+user_module_config_directory = None
+pragma_no_cache = None
+loaded_theme_library = None
 
 #
 # Perl compat functions
@@ -445,23 +449,18 @@ def ReadParse():
 #        }
 #}
 #
-## PrintHeader
-## Outputs the HTTP header for HTML
 
-def _PrintHeader():
-    raise NotImplementedError
+def _PrintHeader(charset=None):
+    """Outputs the HTTP header for HTML"""
+    if pragma_no_cache and config.get("pragma_no_cache"):
+        print "Pragma: no-cache"
 
-#sub PrintHeader
-#{
-#print "pragma: no-cache\n" if ($pragma_no_cache || $config{'pragma_no_cache'});
-#if (defined($_[0])) {
-#        print "Content-type: text/html; Charset=$_[0]\n\n";
-#        }
-#else {
-#        print "Content-type: text/html\n\n";
-#        }
-#}
-#
+    # FIXME: As far as I know, we should print \r as well. 
+    if charset:
+        print "Content-type: text/html; Charset=%s\n" % charset
+    else:
+        print "Content-type: text/html\n"
+
 
 
 ## header(title, image, [help], [config], [nomodule], [nowebmin], [rightside],
@@ -469,193 +468,206 @@ def _PrintHeader():
 
 
 def header(title, image, help=None, config=None, nomodule=None, nowebmin=None,
-           rightside = None, header=None, body=None, below=None):
+           rightside="", header=None, body=None, below=None):
     """Output a page header with some title and image. The header may also
     include a link to help, and a link to the config page.
     The header will also have a link to to webmin index, and a link to the
     module menu if there is no config link.
     """
     if done_webmin_header: return
-    #local($l, $ll, %access, $lang);
     for l in list_languages():
-        pass
+        if l["lang"] == current_lang:
+            lang = l
+
+    if force_charset:
+        charset = force_charset
+    elif lang.has_key("charset"):
+        charset = lang["charset"]
+    else:
+        charset = "iso-8859-1"
+
+    _PrintHeader(charset)
+    _load_theme_library()
+    # FIXME
+    #if theme_header:
+    #    theme_header(all args...)
+    #    return
+    print "<!doctype html public \"-//W3C//DTD HTML 3.2 Final//EN\">"
+    print "<html>"
+    if (charset):
+        print "<meta http-equiv=\"Content-Type\" "\
+              "content=\"text/html; charset=%s\">" % charset
+
+    if gconfig.has_key("real_os_type"):
+        os_type = gconfig["real_os_type"]
+    else:
+        os_type = gconfig["os_type"]
+
+    if gconfig.has_key("real_os_version"):
+        os_version = gconfig["real_os_version"]
+    else:
+        os_version = gconfig["os_version"]
+
+    print "<head>"
+    if gconfig.get("sysinfo") == 1:
+        print "<title>%s : %s on %s (%s %s)</title>" % \
+              (title, remote_user, get_system_hostname(), os_type, os_version)
+    else:
+        print "<title>%s</title>" % title
+
+    if header:
+        print header
+
+    if gconfig.get("sysinfo") == 0 and remote_user:
+        print "<SCRIPT LANGUAGE=\"JavaScript\">"
+        if os.environ.has_key("SSL_USER"):
+            userstring = " (SSL certified)"
+        elif os.environ.has_key("LOCAL_USER"):
+            userstring = " (Local user)"
+        else:
+            userstring = ""
+        
+        print "defaultStatus=\"%s%s logged into %s %s on %s (%s %s)\";" % \
+              (remote_user, userstring, text["programname"], get_webmin_version(), 
+               get_system_hostname(), os_type, os_version)
+        print "</SCRIPT>"
+
+    print tconfig.get("headhtml", ""),
+    if tconfig.has_key("headinclude"):
+        print open(os.path.join(root_directory, current_theme, tconfig["headinclude"])).read()
+
+    print "</head>"
+
+    bgcolor = tconfig.get("cs_page")
+    if not bgcolor:
+        bgcolor = gconfig.get("cs_page")
+    if not bgcolor:
+        bgcolor = "ffffff"
     
-#foreach $l (&list_languages()) {
-#        $lang = $l if ($l->{'lang'} eq $current_lang);
-#        }
-#local $charset = defined($force_charset) ? $force_charset :
-#                 $lang->{'charset'} ? $lang->{'charset'} : "iso-8859-1";
-#&PrintHeader($charset);
-#&load_theme_library();
-#if (defined(&theme_header)) {
-#        &theme_header(@_);
-#        return;
-#        }
-#print "<!doctype html public \"-//W3C//DTD HTML 3.2 Final//EN\">\n";
-#print "<html>\n";
-#if ($charset) {
-#        print "<meta http-equiv=\"Content-Type\" ",
-#              "content=\"text/html; Charset=$charset\">\n";
-#        }
-#local $os_type = $gconfig{'real_os_type'} ? $gconfig{'real_os_type'}
-#                                          : $gconfig{'os_type'};
-#local $os_version = $gconfig{'real_os_version'} ? $gconfig{'real_os_version'}
-#                                                : $gconfig{'os_version'};
-#print "<head>\n";
-#if (@_ > 0) {
-#        if ($gconfig{'sysinfo'} == 1) {
-#                printf "<title>%s : %s on %s (%s %s)</title>\n",
-#                        $_[0], $remote_user, &get_system_hostname(),
-#                        $os_type, $os_version;
-#                }
-#        else {
-#                print "<title>$_[0]</title>\n";
-#                }
-#        print $_[7] if ($_[7]);
-#        if ($gconfig{'sysinfo'} == 0 && $remote_user) {
-#                print "<SCRIPT LANGUAGE=\"JavaScript\">\n";
-#                printf
-#                "defaultStatus=\"%s%s logged into %s %s on %s (%s %s)\";\n",
-#                        $remote_user,
-#                        $ENV{'SSL_USER'} ? " (SSL certified)" :
-#                        $ENV{'LOCAL_USER'} ? " (Local user)" : "",
-#                        $text{'programname'},
-#                        &get_webmin_version(), &get_system_hostname(),
-#                        $os_type, $os_version;
-#                print "</SCRIPT>\n";
-#                }
-#        }
-#print "$tconfig{'headhtml'}\n" if ($tconfig{'headhtml'});
-#if ($tconfig{'headinclude'}) {
-#        open(INC, "$root_directory/$current_theme/$tconfig{'headinclude'}");
-#        while(<INC>) {
-#                print;
-#                }
-#        close(INC);
-#        }
-#print "</head>\n";
-#local $bgcolor = defined($tconfig{'cs_page'}) ? $tconfig{'cs_page'} :
-#                 defined($gconfig{'cs_page'}) ? $gconfig{'cs_page'} : "ffffff";
-#local $link = defined($tconfig{'cs_link'}) ? $tconfig{'cs_link'} :
-#              defined($gconfig{'cs_link'}) ? $gconfig{'cs_link'} : "0000ee";
-#local $text = defined($tconfig{'cs_text'}) ? $tconfig{'cs_text'} : 
-#              defined($gconfig{'cs_text'}) ? $gconfig{'cs_text'} : "000000";
-#local $bgimage = defined($tconfig{'bgimage'}) ? "background=$tconfig{'bgimage'}"
-#                                              : "";
-#print "<body bgcolor=#$bgcolor link=#$link vlink=#$link text=#$text ",
-#      "$bgimage $tconfig{'inbody'} $_[8]>\n";
-#local $hostname = &get_system_hostname();
-#local $version = &get_webmin_version();
-#local $prebody = $tconfig{'prebody'};
-#if ($prebody) {
-#        $prebody =~ s/%HOSTNAME%/$hostname/g;
-#        $prebody =~ s/%VERSION%/$version/g;
-#        $prebody =~ s/%USER%/$remote_user/g;
-#        $prebody =~ s/%OS%/$os_type $os_version/g;
-#        print "$prebody\n";
-#        }
-#if ($tconfig{'prebodyinclude'}) {
-#        open(INC, "$root_directory/$current_theme/$tconfig{'prebodyinclude'}");
-#        while(<INC>) {
-#                print;
-#                }
-#        close(INC);
-#        }
-#if (defined(&theme_prebody)) {
-#        &theme_prebody(@_);
-#        }
-#if (@_ > 1) {
-#        print "<table width=100%><tr>\n";
-#        if ($gconfig{'sysinfo'} == 2 && $remote_user) {
-#                print "<td colspan=3 align=center>\n";
-#                printf "%s%s logged into %s %s on %s (%s %s)</td>\n",
-#                        "<tt>$remote_user</tt>",
-#                        $ENV{'SSL_USER'} ? " (SSL certified)" :
-#                        $ENV{'LOCAL_USER'} ? " (Local user)" : "",
-#                        $text{'programname'},
-#                        $version, "<tt>$hostname</tt>",
-#                        $os_type, $os_version;
-#                print "</tr> <tr>\n";
-#                }
-#        print "<td width=15% valign=top align=left>";
-#        if ($ENV{'HTTP_WEBMIN_SERVERS'}) {
-#                print "<a href='$ENV{'HTTP_WEBMIN_SERVERS'}'>",
-#                      "$text{'header_servers'}</a><br>\n";
-#                }
-#        if (!$_[5] && !$tconfig{'noindex'}) {
-#                local %acl;
-#                &read_acl(undef, \%acl);
-#                local $mc = @{$acl{$base_remote_user}} == 1;
-#                if ($gconfig{'gotoone'} && $main::session_id && $mc == 1) {
-#                        print "<a href='$gconfig{'webprefix'}/session_login.cgi?logout=1'>",
-#                              "$text{'main_logout'}</a><br>";
-#                        }
-#                elsif ($gconfig{'gotoone'} && $mc == 1) {
-#                        print "<a href=$gconfig{'webprefix'}/switch_user.cgi>",
-#                              "$text{'main_switch'}</a><br>";
-#                        }
-#                else {
-#                        print "<a href='$gconfig{'webprefix'}/?cat=$module_info{'category'}'>",
-#                              "$text{'header_webmin'}</a><br>\n";
-#                        }
-#                }
-#        if (!$_[4]) { print "<a href=\"$gconfig{'webprefix'}/$module_name/\">",
-#                            "$text{'header_module'}</a><br>\n"; }
-#        if (ref($_[2]) eq "ARRAY") {
-#                print &hlink($text{'header_help'}, $_[2]->[0], $_[2]->[1]),
-#                      "<br>\n";
-#                }
-#        elsif (defined($_[2])) {
-#                print &hlink($text{'header_help'}, $_[2]),"<br>\n";
-#                }
-#        if ($_[3]) {
-#                local %access = &get_module_acl();
-#                if (!$access{'noconfig'}) {
-#                        local $cprog = $user_module_config_directory ?
-#                                        "uconfig.cgi" : "config.cgi";
-#                        print "<a href=\"$gconfig{'webprefix'}/$cprog?$module_name\">",
-#                              $text{'header_config'},"</a><br>\n";
-#                        }
-#                }
-#        print "</td>\n";
-#        local $title = $_[0];
-#        $title =~ s/&auml;/ä/g;
-#        $title =~ s/&ouml;/ö/g;
-#        $title =~ s/&uuml;/ü/g;
-#        $title =~ s/&nbsp;/ /g;
-#        if ($_[1]) {
-#                print "<td align=center width=70%>",
-#                      "<img alt=\"$_[0]\" src=\"$_[1]\"></td>\n";
-#                }
-#        elsif ($lang->{'titles'} && !$gconfig{'texttitles'} &&
-#               !$tconfig{'texttitles'}) {
-#                print "<td align=center width=70%>";
-#                foreach $l (split(//, $title)) {
-#                        $ll = ord($l);
-#                        if ($ll > 127 && $lang->{'charset'}) {
-#                                print "<img src=$gconfig{'webprefix'}/images/letters/$ll.$lang->{'charset'}.gif alt=\"$l\" align=bottom>";
-#                                }
-#                        elsif ($l eq " ") {
-#                                print "<img src=$gconfig{'webprefix'}/images/letters/$ll.gif alt=\"\&nbsp;\" align=bottom>";
-#                                }
-#                        else {
-#                                print "<img src=$gconfig{'webprefix'}/images/letters/$ll.gif alt=\"$l\" align=bottom>";
-#                                }
-#                        }
-#                if ($_[9]) {
-#                        print "<br>$_[9]\n";
-#                        }
-#                print "</td>\n";
-#                }
-#        else {
-#                print "<td align=center width=70%><h1>$_[0]</h1></td>\n";
-#                }
-#        print "<td width=15% valign=top align=right>";
-#        print $_[6];
-#        print "</td></tr></table>\n";
-#        }
-#}
-#
+    link = tconfig.get("cs_link")
+    if not link:
+        link = gconfig.get("cs_link")
+    if not link:
+        link = "0000ee"
+
+    text = tconfig.get("cs_text")
+    if not text:
+        text = gconfig.get("cs_text")
+    if not text:
+        text = "000000"
+
+    if tconfig.has_key("bgimage"):
+        bgimage = "background=" + tconfig["bgimage"]
+    else:
+        bgimage = ""
+
+    inbody = tconfig.get("inbody", "")
+    print "<body bgcolor=#%(bgcolor)s link=#%(link)s vlink=#%(link)s text=#%(text) " \
+          "%(bgimage)s %(inbody)s %(body)s" % locals()
+
+    hostname = get_system_hostname()
+    version = get_webmin_version()
+    prebody = tconfig.get("prebody", "")
+    if prebody:
+        prebody.replace("%HOSTNAME%", hostname)
+        prebody.replace("%VERSION%", version)
+        prebody.replace("%USER%", remote_user)
+        prebody.replace("%OS%", os_type + os_version)
+        print prebody
+
+    if tconfig.get("prebodyinclude"):
+        print open(os.path.join(root_directory, current_theme, tconfig["prebodyinclude"])).read()
+
+    # FIXME
+    #if (defined(&theme_prebody)) {
+    #        &theme_prebody(@_);
+
+    #if (@_ > 1) {
+    
+    print "<table width=100%><tr>"
+    if gconfig.get("sysinfo") == 2 and remote_user:
+        print "<td colspan=3 align=center>"
+        print "<tt>%s</tt>%s logged into %s %s on <tt>%s</tt> (%s %s)</td>" % \
+              (remote_user, userstring, text["programname"], version, os_type, os_version)
+        print "</tr> <tr>\n";
+        print "<td width=15% valign=top align=left>"
+        if os.environ.has_key("HTTP_WEBMIN_SERVERS"):
+                print "<a href='%s'>" % os.environ["HTTP_WEBMIN_SERVERS"]
+                print "%s</a><br>" % text["header_servers"]
+
+        if not nowebmin and not tconfig.has_key("noindex"):
+            (dummy, acl) = read_acl()
+            mc = acl.has_key(base_remote_user)
+            # FIXME: I dont understand the code below. To me, it looks like we are comparing
+            # a list of strings with the constant 1. This makes no sense to me. 
+            # local $mc = @{$acl{$base_remote_user}} == 1;
+            mc = 0
+            if gconfig.get("gotoone") and session_id and mc == 1:
+                print "<a href='%s/session_login.cgi?logout=1'> %s</a><br>" % \
+                      (gconfig["webprefix"], text["main_logout"])
+            elif gconfig.get("gotoone") and mc == 1:
+                print "<a href='%s/switch_user.cgi'> %s</a><br>" % \
+                      (gconfig["webprefix"], text["main_switch"])
+            else:
+                print "<a href='%s/?cat=%s'> %s </a><br>" % \
+                      (gconfig["webprefix"], text["header_webmin"])
+
+        if not nomodule:
+            print "<a href='%s/%s'> %s </a><br>" % \
+                  (gconfig["webprefix"], module_name, text["header_module"])
+
+        if type(help) == types.ListType:
+            print hlink(text["header_help"], help[0], help[1]), "<br>"
+        elif help:
+            print hlink(text["header_help"], help), "<br>\n"
+
+        if config:
+            access = get_module_acl();
+            if not access.get("noconfig"):
+                if user_module_config_directory:
+                    cprog = "uconfig.cgi"
+                else:
+                    cprog = "config.cgi"
+
+                print "<a href='%s/%s?%s'> %s </a><br>" % \
+                      (gconfig["webprefix"], cprog, module_name, text["header_config"])
+        print "</td>"
+
+        title.replace("&auml", "ä")
+        title.replace("&auml", "ä")
+        title.replace("&ouml", "ö")
+        title.replace("&uuml", "ü")
+        title.replace("&nbsp;", " ")
+
+        if image:
+            print "<td align=center width=70%> <img alt='%s' src='%s'></td>" % \
+                  (image, image)
+        elif lang["titles"] and not gconfig.get("texttitles") and not tconfig.get("texttitles"):
+            print "<td align=center width=70%>"
+            for char in title:
+                charnum = chr(char)
+                if charnum > 127 and lang.get("charset"):
+                    print "<img src='%s/images/letters/%d.%s.gif' alt='%s' align=bottom>" % \
+                          (gconfig["webprefix"], charnum, lang["charset"], char)
+                elif char == "":
+                    print "<img src='%s/images/letters/%d.gif alt='&nbsp;' align=bottom>" % \
+                          (gconfig["webprefix"], charnum)
+                else:
+                    print "<img src='%s/images/letters/%d.gif alt='%s' align=bottom>" % \
+                          (gconfig["webprefix"], charnum, char)
+            if below:
+                print "<br>", below
+
+            print "</td>"
+        else:
+            print "<td align=center width=70%><h1>%s</h1></td>" % title
+
+        print "<td width=15% valign=top align=right>"
+        print rightside
+        print "</td></tr></table>"
+
+
+
 ## footer([page, name]+, [noendbody])
 ## Output a footer for returning to some page
 
@@ -723,17 +735,15 @@ def footer():
 #        }
 #}
 #
-## load_theme_library()
-## For internal use only
+
 def _load_theme_library():
-    raise NotImplementedError
-#sub load_theme_library
-#{
-#return if (!$current_theme || !$tconfig{'functions'} ||
-#           $loaded_theme_library++);
-#do "$root_directory/$current_theme/$tconfig{'functions'}";
-#}
-#
+    """Load theme library"""
+    if not current_theme or not tconfig.get("functions") or loaded_theme_library:
+        return
+    # FIXME: Big problems! The themes are defined as Perl code.
+    # We must probably port the themes to Pyton as well. 
+    #do os.path.join(root_directory, current_theme, tconfig["functions"])
+
 ## redirect
 ## Output headers to redirect the browser to some page
 
@@ -1510,35 +1520,15 @@ def foreign_config():
 ## get_system_hostname()
 
 def get_system_hostname():
-    raise NotImplementedError
-## Returns the hostname of this system
-#sub get_system_hostname
-#{
-#if (!$get_system_hostname) {
-#        chop($get_system_hostname = `hostname 2>/dev/null`);
-#        if ($?) {
-#                use Sys::Hostname;
-#                $get_system_hostname = eval "hostname()";
-#                if ($@) { $get_system_hostname = "UNKNOWN"; }
-#                }
-#        }
-#return $get_system_hostname;
-#}
-#
-## get_webmin_version()
+    """Returns the hostname of this system"""
+    return socket.gethostname()
+
+
 def get_webmin_version():
-    raise NotImplementedError
-## Returns the version of Webmin currently being run
-#sub get_webmin_version
-#{
-#if (!$get_webmin_version) {
-#        open(VERSION, "$root_directory/version") || return 0;
-#        ($get_webmin_version = <VERSION>) =~ s/\r|\n//g;
-#        close(VERSION);
-#        }
-#return $get_webmin_version;
-#}
-#
+    """Returns the version of Webmin currently being run"""
+    line = open(os.path.join(root_directory, "version")).readline()
+    return line.strip()
+
 ## get_module_acl([user], [module])
 
 def get_module_acl():
