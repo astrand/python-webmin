@@ -214,9 +214,19 @@ def theme_header(title, image=None, help=None, config=None, nomodule=None, noweb
                  rightside="", header=None, body=None, below=None):
     available = ["webmin", "system", "servers", "cluster", "hardware", "", "net", "kororaweb"]
     acl = read_acl()
-    
-    print "<!doctype html public \"-//W3C//DTD HTML 3.2 Final//EN\">"
-    print "<Html>"
+
+    for l in list_languages():
+        if l["lang"] == current_lang:
+            lang = l    
+
+    if force_charset:
+        charset = force_charset
+    elif lang.has_key("charset"):
+        charset = lang["charset"]
+    else:
+        charset = "iso-8859-1"    
+
+    print "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\"\n\"http://www.w3.org/TR/REC-html40/loose.dtd\">"
 
     if gconfig.has_key("real_os_type"):
         os_type = gconfig["real_os_type"]
@@ -228,7 +238,11 @@ def theme_header(title, image=None, help=None, config=None, nomodule=None, noweb
     else:
         os_version = gconfig["os_version"]
 
-    print "<head>"
+    print "<html>\n<head>"
+    if (charset):
+        print "<meta http-equiv=\"Content-Type\" "\
+              "content=\"text/html; charset=%s\">" % charset
+    
     print "<link rel='icon' href='images/webmin_icon.png' type='image/png'>"
 
     if gconfig.get("sysinfo") == 1:
@@ -387,15 +401,19 @@ def theme_header(title, image=None, help=None, config=None, nomodule=None, noweb
         cont.append(BR())
         cont.append(chop_font(cats[cat]))
                 
-        TDList.append(TD(Href(uri, Center(cont)), nowrap="nowrap"))
+        TDList.append(TD(Center(Href(uri, cont)), nowrap="nowrap"))
         TDList.append(TD(IMG("/images/nav/sep.jpg", width=17, height=57),
                          width=17))
 
-    TDList.append(TD(Container('&nbsp;'), nowrap="nowrap"))
+    TDList.append(TD(Container('&nbsp;'), nowrap="nowrap", width="100%"))
 
     nav_table.append(nav_table_body + TDList)
 
-    print nav_table
+    # UGLY!
+    # The reason we replace all "\n" with "" is that Mozilla
+    # won't render the menu correctly otherwise. GAAAAH!
+    
+    print str(nav_table).replace("\n", "")
 
     nav_under_table = TableLite(width="100%", border="0", cellspacing="0",
                                 cellpadding="0",
@@ -625,6 +643,9 @@ def chop_font(s):
         ll = ord(char)
         gif = "%s.gif" % ll
         sz = letter_sizes.get(gif, [0, 0])
+        alt=char
+        if " " == char:
+            alt = "&nbsp;"
         cont.append(IMG("/images/letters2/%s" % gif,
                         width=sz[0], height=sz[1], alt=char, border="0",
                         align="bottom"))
