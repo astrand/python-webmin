@@ -1,4 +1,4 @@
-VERSION=0.1
+VERSION=0.1pre
 ROOTDIR=/
 WEBMINDIR=$(ROOTDIR)/usr/libexec/webmin
 
