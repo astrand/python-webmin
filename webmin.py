@@ -642,7 +642,7 @@ def header(title, image=None, help=None, config=None, nomodule=None, nowebmin=No
 
         print "</td>"
     else:
-        print "<td align=center width=70%><h1>%s</h1></td>" % title
+        print "<td align=center width=70%%><h1>%s</h1></td>" % title
 
     print "<td width=15% valign=top align=right>"
     print rightside
