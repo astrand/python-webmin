@@ -1,4 +1,3 @@
-
 #
 # Python implementation of the mscstyle3 theme
 #
@@ -19,6 +18,20 @@
 # theme_error - called instead of the error function, with the same parameters.
 
 from HTMLgen import *
+
+IsUsermin = 0
+
+if IsUsermin:
+     available = ["usermin", "mail", "login", "apps", ""]
+     pytheme_logo = "/usermin_logo.gif"
+     pytheme_logo_link ="http://www.usermin.com/"
+     pytheme_logo_alt = "Usermin homepage"
+else:
+     available = ["webmin", "system", "servers", "cluster", "hardware", 
+                  "", "net", "kororaweb"]
+     pytheme_logo = "/images/top_bar/webmin_logo.jpg"
+     pytheme_logo_link ="http://www.webmin.com/"
+     pytheme_logo_alt = "Webmin homepage"
 
 letter_sizes = {
 	'100.gif': [ 10, 16 ],
@@ -202,10 +215,6 @@ letter_sizes = {
 	'99.gif' : [ 10, 16 ] }
 
 
-
-available = ["webmin", "system", "servers", "cluster", "hardware", "", "net",
-             "kororaweb"]
-
 def theme_header(title, image=None, help=None, config=None, nomodule=None, nowebmin=None,
                  rightside="", header=None, body=None, below=None):
     acl = read_acl()
@@ -292,10 +301,10 @@ def theme_header(title, image=None, help=None, config=None, nomodule=None, noweb
     t_body = TR()
     TDList = [TD(IMG("/images/top_bar/left.jpg", height=32),
                  width=4, nowrap="nowrap"),
-              TD(Href("http://www.webmin.com",
-                      IMG("/images/top_bar/webmin_logo.jpg", width=99,
+              TD(Href(pytheme_logo_link,
+                      IMG(pytheme_logo, width=99,
                           height=32,
-                          border="0", alt="Webmin home page")),
+                          border="0", alt=pytheme_logo_alt)),
                  width="100%", nowrap="nowrap")]
 
     if not os.environ.has_key("ANONYMOUS_USER"):
@@ -349,7 +358,7 @@ def theme_header(title, image=None, help=None, config=None, nomodule=None, noweb
                 cats[c] = mtext["category_%s" % c]
             else:
                 c = ""
-                m["category"] = ""
+                module["category"] = ""
                 cats[c] = text["category_%s" % c]
     sorted_cats = cats.keys()
     sorted_cats.sort()
