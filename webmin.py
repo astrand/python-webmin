@@ -84,14 +84,13 @@ pragma_no_cache = None
 loaded_theme_library = None
 module_info = None
 indata = None
+webmin_module = globals()
 
 #
 # Themes
 #
 # A string with the current theme name
 current_theme = None
-webmin_module = globals()
-
 
 #
 # Perl compat functions
@@ -1602,15 +1601,16 @@ def init_config():
     remote_user = os.environ["REMOTE_USER"]
         
     # Set some useful variables
-    current_theme = gconfig.get("theme_" + remote_user)
-    if not current_theme:
-        current_theme = gconfig.get("theme_" + base_remote_user)
-    if not current_theme:
-        current_theme = gconfig.get("theme", "")
+    # FIXME: Themes disabled, because no themes are ported yet. 
+##     current_theme = gconfig.get("theme_" + remote_user)
+##     if not current_theme:
+##         current_theme = gconfig.get("theme_" + base_remote_user)
+##     if not current_theme:
+##         current_theme = gconfig.get("theme", "")
 
-    if current_theme:
-        read_file_cached(os.path.join(root_directory, current_theme, "config"),
-                         tconfig)
+##     if current_theme:
+##         read_file_cached(os.path.join(root_directory, current_theme, "config"),
+##                          tconfig)
 
     tmpdict = {"cs_header" : "#9999ff"}
     tmpdict.update(gconfig)
