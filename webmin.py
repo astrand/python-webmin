@@ -955,12 +955,12 @@ def read_acl():
                 user = match.group(1)
                 mods = group(2).split()
                 try:
-                    d = acl_hash_cache[user]
+                    allowed_modules = acl_hash_cache[user]
                 except KeyError:
-                    acl_hash_cache[user] = d = {}
+                    acl_hash_cache[user] = allowed_modules = {}
                 
                 for mod in mods:
-                    d[mod] = 1
+                    allowed_modules[mod] = 1
                     
                 acl_array_cache[user] = mods
     
@@ -1706,8 +1706,9 @@ def init_config():
                 error(textsub('emodule', "<i>%s</i>" % u,
                               "<i>%s</i>" % module_info["desc"]))
         else:
-            if not acl.has_key(u + module_name) and \
-               not acl.has_key(u + '*'):
+            allowed_modules = acl.get(u, [])
+            if not allowed_modules.has_key(module_name) or \
+                   not allowed_modules.has_key('*'):
                 error(textsub('emodule', "<i>%s</i>" % u,
                               "<i>%s</i>" % module_info.get("desc")))
             
