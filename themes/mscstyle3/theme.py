@@ -3,10 +3,6 @@
 # Python implementation of the mscstyle3 theme
 #
 
-#
-# NOT FINISHED !!!
-#
-
 # theme_prebody - called just before the main body of every page, so
 # it can print any HTML it likes.
 #
@@ -336,13 +332,6 @@ def theme_header(title, image=None, help=None, config=None, nomodule=None, noweb
 
     print cat_top_table
 
-# local $one = @msc_modules == 1 && $gconfig{'gotoone'};
-# local $notabs = $gconfig{"notabs_${base_remote_user}"} == 2 ||
-# 	$gconfig{"notabs_${base_remote_user}"} == 0 && $gconfig{'notabs'};
-# if (@_ > 1 && !$one && $remote_user && !$notabs) {
-#     # Display module categories
-
-
 
     catnames = read_file(os.path.join(config_directory, "webmin.catnames"))
     cats = {}
@@ -488,151 +477,7 @@ def theme_footer(links, noendbody=None):
 
     print foot_table
                     
-        
 
-            
-            
-
-
-        
-
-
-#     if ($theme_index_page) {
-# 	    if (!defined($in{'cat'})) {
-	       
-# 		# Use default category
-# 		if (defined($gconfig{'deftab'}) &&
-# 		    &indexof($gconfig{'deftab'}, @cats) >= 0) {
-# 		    $in{'cat'} = $gconfig{'deftab'};
-# 		    }
-# 		else {
-# 		    $in{'cat'} = $cats[0];
-# 		    }
-# 		}
-# 	    elsif (!$cats{$in{'cat'}}) {
-# 		$in{'cat'} = "";
-# 		}
-#     }
-
-   
-
-# </table>~;
-#     print qq~<table width="100%" border="0" cellspacing="0" cellpadding="0" background="/images/nav/bottom_bg.jpg" height="4">
-#   <tr>
-#     <td width="100%"><img src="/images/nav/bottom_left.jpg" width="3" height="4"></td>
-#   </tr>
-# </table>~;
-#    }
-
-# if (@_ > 1 && (!$_[5] || $ENV{'HTTP_WEBMIN_SERVERS'})) {
-#    # Show tabs under module categories
-#    print qq~<table width="100%" border="0" cellspacing="0" cellpadding="0" background="/images/nav/bottom_shadow2.jpg"> <tr background="/images/nav/bottom_shadow2.jpg">~;
-
-#    if ($gconfig{'sysinfo'} == 2 && $remote_user) {
-# 	&tab_start();
-# 	printf "%s%s logged into %s %s on %s (%s%s)</td>\n",
-# 		$ENV{'ANONYMOUS_USER'} ? "Anonymous user" : "<tt>$remote_user</tt>",
-# 		$ENV{'SSL_USER'} ? " (SSL certified)" :
-# 		$ENV{'LOCAL_USER'} ? " (Local user)" : "",
-# 		$text{'programname'},
-# 		$version, "<tt>".&get_system_hostname()."</tt>",
-# 		$os_type, $os_version eq "*" ? "" : " $os_version";
-# 	&tab_end();
-# 	}
-#    if ($ENV{'HTTP_WEBMIN_SERVERS'}) {
-# 	&tab_start();
-# 	print "<a href='$ENV{'HTTP_WEBMIN_SERVERS'}'>",
-# 	      "$text{'header_servers'}</a><br>\n";
-# 	&tab_end();
-# 	}
-# 	if ($notabs && !$_[5]) { 
-# 		&tab_start;
-# 		print "<a href='$gconfig{'webprefix'}/?cat=$module_info{'category'}'>$text{'header_webmin'}</a><br>\n";
-# 		&tab_end;
-# 		}
-# 	if (!$_[4]) {
-# 		local $mi = $module_index_link || "/$module_name/";
-# 		&tab_start; print "<a href=\"$gconfig{'webprefix'}$mi\">",
-# 			    "$text{'header_module'}</a>"; &tab_end;
-# 		}
-# 	if (ref($_[2]) eq "ARRAY" && !$ENV{'ANONYMOUS_USER'}) {
-# 		&tab_start; print &hlink($text{'header_help'}, $_[2]->[0], $_[2]->[1]); &tab_end;
-# 		}
-# 	elsif (defined($_[2]) && !$ENV{'ANONYMOUS_USER'}) {
-# 		&tab_start; print &hlink($text{'header_help'}, $_[2]); &tab_end;
-# 		}
-# 	if ($_[3]) {
-# 		if (!$access{'noconfig'}) {
-# 			&tab_start; print "<a href=\"/config.cgi?$module_name\">",
-# 			      $text{'header_config'},"</a>"; &tab_end;
-# 			}
-# 		}
-
-#     local $t;
-#     foreach $t (split(/<br>/, $_[6])) {
-#       if ($t =~ /\S/) {
-# 	      &tab_start; print $t; &tab_end;
-#       }
-#     }
-
-# print qq~
-#     <td nowrap width="100%" background="/images/nav/bottom_shadow2.jpg" valign="top">
-
-#       <table width="100%" border="0" cellspacing="0" cellpadding="0" background="/images/nav/bottom_shadow2.jpg">
-#         <tr>
-#           <td><img src="/unauthenticated/nav/bottom_shadow.jpg" width="43" height="9"></td>
-#         </tr>
-#       </table>
-
-
-#     </td>
-#   </tr>
-# </table>~;
-
-#     if (!$_[5]) {
-# 	    # Show page title in tab
-# 	    local $title = $_[0];
-# 	    $title =~ s/&auml;/ä/g;
-# 	    $title =~ s/&ouml;/ö/g;
-# 	    $title =~ s/&uuml;/ü/g;
-# 	    $title =~ s/&nbsp;/ /g;
-
-# 	    print "<p><table border=0 cellpadding=0 cellspacing=0 width=95% align=center><tr><td><table border=0 cellpadding=0 cellspacing=0 height=20><tr>\n";
-# 	    print "<td bgcolor=#bae3ff>",
-# 	      "<img src=/images/tabs/blue_left.jpg width=13 height=22 ",
-# 	      "alt=\"\">","</td>\n";
-# 	    print "<td bgcolor=#bae3ff>&nbsp;<b>$title</b>&nbsp;</td>\n";
-# 	    print "<td bgcolor=#bae3ff>",
-# 	      "<img src=/images/tabs/blue_right.jpg width=19 height=22 ",
-# 	      "alt=\"\">","</td>\n";
-# 	    if ($_[9]) {
-# 		print "</tr></table></td> <td align=right><table border=0 cellpadding=0 cellspacing=0 height=20><tr>\n";
-# 		print "<td bgcolor=#bae3ff>",
-# 		      "<img src=/images/tabs/blue_left.jpg width=13 height=22 ",
-# 		      "alt=\"\">","</td>\n";
-# 		print "<td bgcolor=#bae3ff>&nbsp;<b>$_[9]</b>&nbsp;</td>\n";
-# 		print "<td bgcolor=#bae3ff>",
-# 		      "<img src=/images/tabs/blue_right.jpg width=19 height=22",
-# 		      " alt=\"\">","</td>\n";
-# 		}
-# 	    print "</tr></table></td></tr></table>"; 
-
-# 	     &theme_prebody;
-# 	}
-#     } elsif (@_ > 1) {
-# 	    print qq~<table width="100%" border="0" cellspacing="0" cellpadding="0" background="/unauthenticated/nav/bottom_shadow.jpg">
-# 	  <tr>
-# 	    <td width="100%" nowrap><img src="/unauthenticated/nav/bottom_shadow.jpg" width="43" height="9"></td>
-# 	  </tr>
-# 	</table><br>~;
-#     }
-# @header_arguments = @_;
-# }
-    
-                   
-    
-
-    
 
 def chop_font(s):
     if gconfig.get("texttitles"):
@@ -651,26 +496,3 @@ def chop_font(s):
                         align="bottom"))
 
     return cont
-        
-        
-
-# sub chop_font {
-
-# if (!$current_lang_info->{'titles'} || $gconfig{'texttitles'}) {
-# 	print $t;
-# } else {
-#         foreach $l (split(//, $t)) {
-#             $ll = ord($l);
-# 	    local $gif;
-#             if ($ll > 127 && $current_lang_info->{'charset'}) {
-# 		$gif = "$ll.$current_lang_info->{'charset'}.gif";
-# 		}
-# 	    else {
-# 		$gif = "$ll.gif";
-# 		}
-# 	    local $sz = $letter_sizes{$gif};
-# 	    printf "<img src=/images/letters2/%s width=%d height=%d alt=\"%s\" align=bottom border=0>",
-# 		$gif, $sz->[0], $sz->[1], $ll eq " " ? "&nbsp;" : $ll;
-#             }
-# 	}
-# }
