@@ -469,6 +469,9 @@ def _PrintHeader(charset=None):
     else:
         print "Content-type: text/html\n"
 
+    # Flush
+    sys.stdout.flush()
+    sys.stderr.flush()
 
 
 ## header(title, image, [help], [config], [nomodule], [nowebmin], [rightside],
@@ -476,7 +479,7 @@ def _PrintHeader(charset=None):
 
 
 def header(title, image=None, help=None, config=None, nomodule=None, nowebmin=None,
-           rightside="", header=None, body=None, below=None):
+           rightside="", header=None, body="", below=None):
     """Output a page header with some title and image. The header may also
     include a link to help, and a link to the config page.
     The header will also have a link to to webmin index, and a link to the
@@ -571,8 +574,8 @@ def header(title, image=None, help=None, config=None, nomodule=None, nowebmin=No
         bgimage = ""
 
     inbody = tconfig.get("inbody", "")
-    print "<body bgcolor=#%(bgcolor)s link=#%(link)s vlink=#%(link)s text=#%(text_color) " \
-          "%(bgimage)s %(inbody)s %(body)s" % locals()
+    print "<body bgcolor=#%(bgcolor)s link=#%(link)s vlink=#%(link)s text=#%(text_color)s " \
+          "%(bgimage)s %(inbody)s %(body)s>" % locals()
 
     hostname = get_system_hostname()
     version = get_webmin_version()
