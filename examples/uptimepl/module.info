@@ -1,0 +1,4 @@
+name=UptimePl
+category=system
+desc=Uptime Demo Module (Perl)
+depends=0.970
