@@ -321,20 +321,13 @@ def un_urlize():
 #return $rv;
 #}
 #
-## include
-## Read and output the named file
-#sub include
-def include():
-    raise NotImplementedError
-#{
-#open(INCLUDE, $_[0]) || return 0;
-#while(<INCLUDE>) {
-#        print;
-#        }
-#close(INCLUDE);
-#return 1;
-#}
-#
+
+
+def include(file):
+    """Read and output the named file"""
+    print open(file).read()
+
+
 ## copydata
 
 def copydata():
