@@ -2702,7 +2702,7 @@ def _serialize_variable():
 ## unserialise_variable(string)
 ## Converts a string created by serialise_variable() back into the original
 ## scalar, hash ref, array ref or scalar ref.
-def _unserialise_variable:
+def _unserialise_variable():
     raise NotImplementedError
 #sub unserialise_variable
 #{
@@ -2756,7 +2756,7 @@ def other_groups():
 #
 ## date_chooser_button(dayfield, monthfield, yearfield, [form])
 def date_chooser_button():
-    raiste NotImplementedError
+    raise NotImplementedError
 ## Returns HTML for a date-chooser button
 #sub date_chooser_button
 #{
