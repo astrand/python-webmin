@@ -70,6 +70,7 @@ module_root_directory = None
 module_categories = {}
 current_lang = "en"
 default_lang = "en"
+list_languages_cache = []
 
 
 #
@@ -461,20 +462,24 @@ def _PrintHeader():
 #        }
 #}
 #
+
+
 ## header(title, image, [help], [config], [nomodule], [nowebmin], [rightside],
 ##	 [header], [body], [below])
-## Output a page header with some title and image. The header may also
-## include a link to help, and a link to the config page.
-## The header will also have a link to to webmin index, and a link to the
-## module menu if there is no config link
 
-def header():
-    raise NotImplementedError
 
-#sub header
-#{
-#return if ($main::done_webmin_header++);
-#local($l, $ll, %access, $lang);
+def header(title, image, help=None, config=None, nomodule=None, nowebmin=None,
+           rightside = None, header=None, body=None, below=None):
+    """Output a page header with some title and image. The header may also
+    include a link to help, and a link to the config page.
+    The header will also have a link to to webmin index, and a link to the
+    module menu if there is no config link.
+    """
+    if done_webmin_header: return
+    #local($l, $ll, %access, $lang);
+    for l in list_languages():
+        pass
+    
 #foreach $l (&list_languages()) {
 #        $lang = $l if ($l->{'lang'} eq $current_lang);
 #        }
@@ -1706,7 +1711,7 @@ def init_config():
                 error(textsub('emodule', "<i>%s</i>" % u,
                               "<i>%s</i>" % module_info["desc"]))
         else:
-            allowed_modules = acl.get(u, [])
+            allowed_modules = acl.get(u, {})
             if not allowed_modules.has_key(module_name) or \
                    not allowed_modules.has_key('*'):
                 error(textsub('emodule', "<i>%s</i>" % u,
@@ -1972,33 +1977,49 @@ def get_theme_info():
 #return %rv;
 #}
 #
-## list_languages()
+
+
 def list_languages():
-    raise NotImplementedError
-## Returns an array of supported languages
-#sub list_languages
-#{
-#if (!@list_languages_cache) {
-#        local ($o, $_);
-#        open(LANG, "$root_directory/lang_list.txt");
-#        while(<LANG>) {
-#                if (/^(\S+)\s+(.*)/) {
-#                        local $l = { 'desc' => $2 };
-#                        foreach $o (split(/,/, $1)) {
-#                                if ($o =~ /^([^=]+)=(.*)$/) {
-#                                        $l->{$1} = $2;
-#                                        }
-#                                }
-#                        $l->{'index'} = scalar(@rv);
-#                        push(@list_languages_cache, $l);
-#                        }
-#                }
-#        close(LANG);
-#        @list_languages_cache = sort { $a->{'desc'} cmp $b->{'desc'} }
-#                                     @list_languages_cache;
-#        }
-#return @list_languages_cache;
-#}
+    """Returns a list of dictionaries with supported languages, like:
+    
+    [{'lang': 'en', 'titles': '1', 'desc': 'English'},
+    {'lang': 'de', 'titles': '1', 'desc': 'German'}]
+
+    The list is sorted on 'desc'. 
+    
+    """
+    global list_languages_cache
+    if not list_languages_cache:
+        for line in open(os.path.join(root_directory, "lang_list.txt")):
+            # Get rid of \n
+            line = line.rstrip()
+            # Separate line in two chunks
+            try:
+                (infostring, desc) = line.split(None, 1)
+            except ValueError:
+                # Malformed line
+                continue
+            lang = {"desc": desc}
+            for nameval in infostring.split(","):
+                # nameval is something like "titles=0"
+                try:
+                    (name, val) = nameval.split("=")
+                    lang[name] = val
+                except ValueError:
+                    # Its a bit strange that we should continue in this case,
+                    # but web-lib does it, so...
+                    continue
+            # The line below is from web-lib.pl. I have no idea what it does...
+            #$l->{'index'} = scalar(@rv);
+            list_languages_cache.append(lang)
+
+        # Done with file. Sort.
+        list_languages_cache.sort(lambda x,y: x["desc"] < y["desc"])
+        
+        return list_languages_cache
+
+
+
 #
 ## read_env_file(file, &array)
 def read_env_file():
