@@ -28,6 +28,7 @@ import os
 import sys
 import re
 import types
+import cgi
 
 #
 # Global variables
@@ -86,7 +87,6 @@ current_theme = None
 webmin_module = globals()
 
 
-
 #
 # Perl compat functions
 #
@@ -108,10 +108,6 @@ try:
     del os.environ["SESSION_ID"]
 except KeyError: pass
 
-
-#$remote_error_handler = "error";
-#@INC = &unique(@INC, ".");
-#
 
 def read_file(file, dict=None):
     """Return a dictionary with name=value pairs from a file
@@ -165,22 +161,12 @@ def write_file(file, newdict):
     # FIXME
     #if read_file_cached: update...
 
-## html_escape
-def html_escape():
-    raise NotImplementedError
-## Convert &, < and > codes in text to HTML entities
-#sub html_escape
-#{
-#local($tmp);
-#$tmp = $_[0];
-#$tmp =~ s/&/&amp;/g;
-#$tmp =~ s/</&lt;/g;
-#$tmp =~ s/>/&gt;/g;
-#$tmp =~ s/\"/&quot;/g;
-#$tmp =~ s/\'/&#39;/g;
-#return $tmp;
-#}
-#
+
+def html_escape(s):
+    """Convert &, < and > codes in text to HTML entities"""
+    return cgi.escape(s)
+
+
 ## tempname([filename])
 
 def tempname():
