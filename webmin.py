@@ -1710,6 +1710,8 @@ def init_config():
     match = re.search("^(http|https|ftp):\/\/([^:]+:[^@]+@)?([^\/:@]+)", http_referer)
     if match:
         referer_site = match.group(3)
+    else:
+        referer_site = None
 
     http_host = os.environ.get("HTTP_HOST", "")
     http_host = re.sub(":\d+$", "", http_host)
