@@ -5,7 +5,7 @@ Release: 1
 Requires: webmin
 Copyright: GPL
 Group: System/Tools
-Source: python-webmin-0.1pre.tgz
+Source: python-webmin-0.2pre.tgz
 URL: http://www.cendio.se/~peter/python-webmin/
 Packager: Peter Åstrand <astrand@lysator.liu.se>
 BuildRoot: %{_tmppath}/%{name}-root
