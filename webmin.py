@@ -31,7 +31,9 @@ import types
 import cgi
 import time
 import cgi
-
+# added for use in create_user_config_dirs()
+import pwd,os.path
+ 
 #
 # Global variables
 #
@@ -65,6 +67,7 @@ text                     = {}
 tconfig                  = {} 
 config                   = {}
 gconfig                  = {}
+userconfig               = {}
 module_name              = None
 module_config_directory  = None
 
@@ -76,6 +79,7 @@ cb  = None
 
 scriptname                    = None
 remote_user                   = None
+remote_user_info              = None
 base_remote_user              = None
 root_directory                = None
 module_root_directory         = None
@@ -3064,32 +3068,37 @@ def switch_to_remote_user():
 #        }
 #}
 #
-## create_user_config_dirs()
+
 def create_user_config_dirs():
-    raise NotImplementedError
-## Creates per-user config directories and sets $user_config_directory and
-## $user_module_config_directory to them. Also reads per-user module configs
-## into %userconfig
-#sub create_user_config_dirs
-#{
-#return if (!$gconfig{'userconfig'});
-#local @uinfo = @remote_user_info ? @remote_user_info : getpwnam($remote_user);
-#return if (!@uinfo || !$uinfo[7]);
-#$user_config_directory = "$uinfo[7]/$gconfig{'userconfig'}";
-#mkdir($user_config_directory, 0755) if (!-d $user_config_directory);
-#if ($module_name) {
-#        $user_module_config_directory = "$user_config_directory/$module_name";
-#        mkdir($user_module_config_directory, 0755)
-#                if (!-d $user_module_config_directory);
-#        undef(%userconfig);
-#        &read_file_cached("$module_root_directory/defaultuconfig",
-#                          \%userconfig);
-#        &read_file_cached("$module_config_directory/uconfig", \%userconfig);
-#        &read_file_cached("$user_module_config_directory/config",
-#                          \%userconfig);
-#        }
-#}
-#
+    """ Creates per-user config directories and sets $user_config_directory and
+    $user_module_config_directory to them. 
+    Also reads per-user module configs into %userconfig
+    Note: if switch_to_remote_user() is not called before this function
+    nonexisting directories will be created with root ownership!
+    -> they are then not writeable by usermin's uconfig.cgi
+    """
+    global user_config_directory,user_module_config_directory,userconfig
+    
+    if not gconfig.has_key('userconfig'): return
+    if not remote_user_info:
+	uinfo = pwd.getpwnam(remote_user)	
+    else:
+	uinfo = remote_user_info
+    
+    if not uinfo or not uinfo[5]: return
+    
+    user_config_directory = os.path.join(uinfo[5],gconfig['userconfig'])
+    if not os.path.exists(user_config_directory):
+	os.mkdir(user_config_directory,0755)
+    if module_name:
+	user_module_config_directory = os.path.join(user_config_directory,module_name)	
+	if not os.path.exists(user_module_config_directory):
+	    os.mkdir(user_module_config_directory,0755)
+	userconfig={}	
+	read_file_cached(module_root_directory+os.sep+'defaultuconfig',userconfig)
+	read_file_cached(module_config_directory+os.sep+'uconfig',userconfig)
+	read_file_cached(user_module_config_directory+os.sep+'config',userconfig)
+
 ## filter_javascript(text)
 def filter_javascript():
     raise NotImplementedError
