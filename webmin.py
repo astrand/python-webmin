@@ -38,8 +38,8 @@ read_file_cache = None
 tempfilecount = 0
 done_webmin_header = 0
 whatfailed = None
-acl_hash_cache = None
-acl_array_cache = None
+acl_hash_cache = {}
+acl_array_cache = {}
 done_foreign_require = None
 foreign_args = None
 no_acl_check = None
@@ -67,6 +67,7 @@ current_theme = None
 root_directory = None
 module_root_directory = None
 module_categories = {}
+current_lang = None
 
 default_lang = "en"
 
@@ -870,7 +871,6 @@ def read_acl():
                     acl_hash_cache[user + mod] = 1
                 acl_array_cache[user] = mods
     
-
     # Available as global variables, but return them anyway...
     return (acl_hash_cache, acl_array_cache)
 #
@@ -1431,7 +1431,7 @@ def init_config():
     global config, gconfig, module_name, module_config_directory, tb, cb, \
            scriptname, remote_user, base_remote_user, current_theme, \
            root_directory, module_root_directory
-    global no_acl_check, no_referers_check
+    global no_acl_check, no_referers_check, current_lang
 
     # Read the webmin global config file. This contains the OS type and version,
     # OS specific configuration and global options such as proxy servers
@@ -1546,7 +1546,7 @@ def init_config():
             if not acl.has_key(u + module_name) and \
                not acl.has_key(u + '*'):
                 error(textsub('emodule', "<i>%s</i>" % u,
-                              "<i>%s</i>" % module_info["desc"]))
+                              "<i>%s</i>" % module_info.get("desc")))
             
         no_acl_check = 1
 
@@ -1666,18 +1666,14 @@ def load_language(module=None):
     return local_text
 
 
-def text_subs():
-    # FIXME
-    return 
-#
-#sub text_subs
-#{
-#local $t = $_[1]->{$_[0]};
-#return defined($t) ? $t : '$'.$_[0];
-#}
-
+def _text_subs(s, dict):
+    if dict.has_key(s):
+        return dict[s]
+    else:
+        return "$" + s
+    
 def textsub(message, *substitute):
-    rv = text[message]
+    rv = text.get(message, "")
     for i in range (0, len(substitute)):
         # The translation string variables began at $1, thus the +1
         rv = re.sub("\$%d" % (i + 1), substitute[i], rv)
