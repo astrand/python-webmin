@@ -1,4 +1,4 @@
-VERSION=0.2pre
+VERSION=0.3pre
 ROOTDIR=/
 WEBMINDIR=$(ROOTDIR)/usr/libexec/webmin
 USERMINDIR=$(ROOTDIR)/usr/libexec/usermin
