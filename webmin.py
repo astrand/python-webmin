@@ -453,10 +453,6 @@ def _PrintHeader(charset=None):
     sys.stderr.flush()
 
 
-## header(title, image, [help], [config], [nomodule], [nowebmin], [rightside],
-##	 [header], [body], [below])
-
-
 def header(title, image=None, help=None, config=None, nomodule=None, nowebmin=None,
            rightside="", header=None, body="", below=None):
     """Output a page header with some title and image. The header may also
@@ -725,6 +721,7 @@ def _load_theme_library():
     themefile = os.path.join(root_directory, current_theme, filename)
     execfile(themefile, webmin_module, webmin_module)
 
+
 ## redirect
 ## Output headers to redirect the browser to some page
 
@@ -824,6 +821,7 @@ def error(*message):
         print "<hr>"
         footer()
 
+
 def _error_setup():
     # Note: this is probably a public function, although it is not lised on http://www.webmin.com/modules.html
     raise NotImplementedError
@@ -893,22 +891,32 @@ def fast_wait_for():
 #        }
 #}
 #
-## has_command(command)
+
 
 def has_command(command):
-    raise NotImplementedError
-## Returns the full path if some command is in the path, undef if not
-#sub has_command
-#{
-#local($d);
-#if (!$_[0]) { return undef; }
-#if ($_[0] =~ /^\//) { return (-x $_[0]) ? $_[0] : undef; }
-#foreach $d (split(/:/ , $ENV{PATH})) {
-#        if (-x "$d/$_[0]") { return "$d/$_[0]"; }
-#        }
-#return undef;
-#}
-#
+    """Returns the full path if some command is in the path, None if not"""
+    for path_dir in os.environ["PATH"].split(os.pathsep):
+        fullpath = os.path.join(path_dir, command)
+        if os.path.exists(fullpath):
+            fstat = os.stat(fullpath)
+            if fstat[stat.ST_UID] == os.getuid():
+                # We own this file
+                if fstat[stat.ST_MODE] & stat.S_IXUSR:
+                    return fullpath
+                else: continue
+            elif fstat[stat.ST_GID] == os.getgid():
+                # Our group
+                if fstat[stat.ST_MODE] & stat.S_IXGRP:
+                    return fullpath
+                else: continue
+            else:
+                # Other
+                if fstat[stat.ST_MODE] & stat.S_IXOTH:
+                    return fullpath
+                else: continue
+    return None
+
+
 ## make_date(seconds)
 def make_date():
     raise NotImplementedError
