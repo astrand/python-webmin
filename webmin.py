@@ -65,6 +65,7 @@ base_remote_user = None
 current_theme = None
 root_directory = None
 module_root_directory = None
+module_categories = {}
 
 
 #
@@ -97,7 +98,12 @@ def read_file(file):
     """Read a file and return a dictionary with name=value pairs from a file
     """
     dict = {}
-    f = open(file)
+    try:
+        f = open(file)
+    except:
+        # web-lib.pl actually returns on all open errors. I think this is crazy, but
+        # we does as web-lib.pl. 
+        return dict
     for line in f:
         # Get rid of \n
         line = line.rstrip()
@@ -1695,31 +1701,33 @@ def terror(*params):
 #    return $res;
 #}
 #
-## get_module_info(module, [noclone])
-## Returns a hash containg a module name, desc and os_support
-#sub get_module_info
-#{
-#return () if ($_[0] =~ /^\./);
-#local (%rv, $clone);
-#&read_file_cached("$root_directory/$_[0]/module.info", \%rv) || return ();
-#$clone = -l "$root_directory/$_[0]";
-#$rv{"desc"} = $rv{"desc_$current_lang"} if ($rv{"desc_$current_lang"});
-#if ($clone && !$_[1] && $config_directory) {
-#        $rv{'clone'} = $rv{'desc'};
-#        &read_file("$config_directory/$_[0]/clone", \%rv);
-#        }
-#$rv{'dir'} = $_[0];
-#if (!defined(%module_categories) && $config_directory) {
-#        %module_categories = ( );
-#        &read_file_cached("$config_directory/webmin.cats",
-#                          \%module_categories);
-#        }
-#$rv{'realcategory'} = $rv{'category'};
-#$rv{'category'} = $module_categories{$_[0]}
-#        if (defined($module_categories{$_[0]}));
-#return %rv;
-#}
-#
+
+def get_module_info(module, noclone=None):
+    """Returns a hash containg a module name, desc and os_support"""
+    if module.startswith("."): return {}
+    rv = read_file_cached(os.path.join(root_directory, module, "module.info"))
+    if not rv:
+        return {}
+
+    clone = os.path.islink(os.path.join(root_directory, module))
+    if rv.has_key("desc_" + current_lang):
+        rv["desc"] = rv["desc_" + current_lang]
+
+    if clone and not noclone and config_directory:
+        rv["clone"] = rv.get("desc", "")
+        rv = read_file(os.path.join(config_directory, module, "clone"))
+
+    rv["dir"] = module
+    # FIXME: What is module_categories for?
+    if not module_categories and config_directory:
+        module_categories = read_file_cached(os.path.join(config_directory, "webmin.cats"))
+
+    rv["realcategory"] = rv.get("category", "")
+    if module_categories.has_key(module):
+        rv["category"] = module_categories[module]
+
+    return rv
+
 ## get_all_module_infos([nocache])
 ## Returns a vector contains the information on all modules in this webmin
 ## install, including clones
