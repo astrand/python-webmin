@@ -1,4 +1,4 @@
-VERSION=0.3pre
+VERSION=0.4
 ROOTDIR=/
 WEBMINDIR=$(ROOTDIR)/opt/python-webmin
 USERMINDIR=$(ROOTDIR)/opt/python-webmin

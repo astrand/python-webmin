@@ -1,11 +1,11 @@
 Summary: A Python implementation of the Webmin API
 Name: python-webmin
-Version: 0.3pre
-Release: 2
+Version: 0.4
+Release: 1
 Requires: webmin
 Copyright: GPL
 Group: System/Tools
-Source: python-webmin-0.3pre.tgz
+Source: python-webmin-%{version}.tgz
 URL: http://www.cendio.se/~peter/python-webmin/
 Packager: Peter Åstrand <astrand@lysator.liu.se>
 BuildRoot: %{_tmppath}/%{name}-root
