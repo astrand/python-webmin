@@ -1418,11 +1418,15 @@ def _unix_group_input():
 #       &group_chooser_button($_[0], 0)."\n";
 #}
 #
-## hlink(text, page, [module])
 
-def hlink():
-    raise NotImplementedError
-
+def hlink(text, page, module=None):
+    """Returns HTML for a link to a help page"""
+    if not module:
+        mod = module_name
+    else:
+        mod = module
+    return "<a onClick='window.open(\""+gconfig.get("webprefix","")+"/help.cgi/"+mod+"/"+page+"\", \"help\", \"toolbar=no,menubar=no,scrollbars=yes,width=400,height=300,resizable=yes\"); return false' href=\""+gconfig.get("webprefix","")+"/help.cgi/"+mod+"/"+page+"\">"+text+"</a>"
+    
 #sub hlink
 #{
 #local $mod = $_[2] ? $_[2] : $module_name;
