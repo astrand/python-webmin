@@ -728,35 +728,38 @@ def _load_theme_library():
     except IOError:
         pass
 
+def redirect(url=""):
+    """Output headers to redirect the browser to some page"""
+    if url==None: url=""
+    server_port=os.environ.get("SERVER_PORT","")
+    https=os.environ.get("HTTPS","").upper()
+    script_name=os.environ.get("SCRIPT_NAME","")
+    if server_port == "443" and https == "ON":
+        port=""
+    elif server_port == "80" and https != "ON":
+        port=""
+    else:
+        port=":"+server_port
+    prot="http"
+    if https == "ON":
+        prot="https"
+    if gconfig.has_key("webprefixnoredir"):
+        wp=gconfig["webprefixnoredir"]
+    else:
+        wp=gconfig.get("webprefix","")
+    if re.compile("^(http|https|ftp|gopher):").search(url):
+        url=url
+    elif url.startswith("/"):
+        url="%s://%s%s%s%s" %(prot,os.environ.get("SERVER_NAME",""),port,wp,url)
+    elif re.compile("^(.*)\/[^\/]*$").search(script_name):
+        url="%s://%s%s%s/%s%s" %(prot,os.environ.get("SERVER_NAME",""),port,re.compile("^(.*)\/[^\/]*$").search(script_name).group(1),wp,url)
+    else:
+        url="%s://%s%s/%s%s" %(prot,os.environ.get("SERVER_NAME",""),port,wp,url)
 
-## redirect
-## Output headers to redirect the browser to some page
+    print "Location: %s\n\n" % url
 
-def redirect():
-    raise NotImplementedError
 
-#sub redirect
-#{
-#local($port, $prot, $url);
-#$port = $ENV{'SERVER_PORT'} == 443 && uc($ENV{'HTTPS'}) eq "ON" ? "" :
-#        $ENV{'SERVER_PORT'} == 80 && uc($ENV{'HTTPS'}) ne "ON" ? "" :
-#                ":$ENV{'SERVER_PORT'}";
-#$prot = uc($ENV{'HTTPS'}) eq "ON" ? "https" : "http";
-#if ($_[0] =~ /^(http|https|ftp|gopher):/) {
-#        $url = $_[0];
-#        }
-#elsif ($_[0] =~ /^\//) {
-#        $url = "$prot://$ENV{'SERVER_NAME'}$port$_[0]";
-#        }
-#elsif ($ENV{'SCRIPT_NAME'} =~ /^(.*)\/[^\/]*$/) {
-#        $url = "$prot://$ENV{'SERVER_NAME'}$port$1/$_[0]";
-#        }
-#else {
-#        $url = "$prot://$ENV{'SERVER_NAME'}$port/$_[0]";
-#        }
-#print "Location: $url\n\n";
-#}
-#
+
 ## kill_byname(name, signal)
 
 def kill_byname(name, signal):
@@ -2755,16 +2758,16 @@ def other_groups(user):
             usergrps.append(g[2])
     return usergrps
 
-## date_chooser_button(dayfield, monthfield, yearfield, [form])
-def date_chooser_button():
-    raise NotImplementedError
-## Returns HTML for a date-chooser button
-#sub date_chooser_button
-#{
-#local $form = @_ > 3 ? $_[3] : 0;
-#return "<input type=button onClick='window.dfield = document.forms[$form].$_[0]; window.mfield = document.forms[$form].$_[1]; window.yfield = document.forms[$form].$_[2]; window.open(\"$gconfig{'webprefix'}/date_chooser.cgi?day=\"+escape(dfield.value)+\"&month=\"+escape(mfield.selectedIndex)+\"&year=\"+yfield.value, \"chooser\", \"toolbar=no,menubar=no,scrollbars=yes,width=250,height=225\")' value=\"...\">\n";
-#}
-#
+def date_chooser_button(dayfield, monthfield, yearfield, formno=0):
+    """Returns HTML for a date-chooser button"""
+    if not dayfield or not monthfield or not yearfield:
+        return ""
+    return '<input type=button onClick=\'window.dfield = document.forms[%s].%s; window.mfield = document.forms[%s].%s;'\
+        ' window.yfield = document.forms[%s].%s; window.open("%s/date_chooser.cgi?day="+escape(dfield.value)+"&month='\
+        '"+escape(mfield.selectedIndex)+"&year="+yfield.value, "chooser",'\
+        ' "toolbar=no,menubar=no,scrollbars=yes,width=250,height=225")\' value="...">\n' % \
+            (formno,dayfield,formno,monthfield,formno,yearfield,gconfig.get('webprefix',''))
+  
 ## help_file(module, file)
 def _help_file():
     raise NotImplementedError
