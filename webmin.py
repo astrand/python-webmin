@@ -427,6 +427,9 @@ def _PrintHeader(charset=None):
     sys.stdout.flush()
     sys.stderr.flush()
 
+    # Make sure further errors are visible.
+    sys.stderr = sys.stdout
+
 
 def header(title, image=None, help=None, config=None, nomodule=None, nowebmin=None,
            rightside="", header=None, body="", below=None):
