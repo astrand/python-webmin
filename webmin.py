@@ -113,16 +113,20 @@ except KeyError: pass
 #@INC = &unique(@INC, ".");
 #
 
-def read_file(file, dict={}):
+def read_file(file, dict=None):
     """Return a dictionary with name=value pairs from a file
     If an existing dictionary is given, it will be updated
     Note: Currently there is not way to check if the read failed or not.
     This function should probably raise an exception on error. 
     """
+    if not dict:
+        dict = {}
+    
     try:
         f = open(file)
     except:
         return dict
+
     for line in f:
         # Get rid of \n
         line = line.rstrip()
@@ -134,39 +138,31 @@ def read_file(file, dict={}):
         name = name.strip()
         value = value.strip()
         dict[name] = value
-        
+
     return dict
 
 
-def read_file_cached(file, dict={}):
+def read_file_cached(file, dict=None):
     """Like read_file, but reads from a cache if the file has already been read
     """
     # FIXME
+    if not dict:
+        dict = {}
     return read_file(file, dict)
         
 
-## write_file(file, array)
-## Write out the contents of an associative array as name=value lines
+def write_file(file, newdict):
+    """Write out the contents of an associative array as name=value lines"""
+    # FIXME: Maybe preserve order, some day.
+    dict = read_file(file)
+    dict.update(newdict)
+    f = open(file, "w")
+    for key in dict.keys():
+        print >> f, "%s=%s" % (key, dict[key])
 
-def write_file():
-    raise NotImplementedError
-#sub write_file
-#{
-#local(%old, @order);
-#&read_file($_[0], \%old, \@order);
-#open(ARFILE, ">$_[0]");
-#foreach $k (@order) {
-#        print ARFILE $k,"=",$_[1]->{$k},"\n" if (exists($_[1]->{$k}));
-#        }
-#foreach $k (keys %{$_[1]}) {
-#        print ARFILE $k,"=",$_[1]->{$k},"\n" if (!exists($old{$k}));
-#        }
-#close(ARFILE);
-#if (defined($main::read_file_cache{$_[0]})) {
-#        %{$main::read_file_cache{$_[0]}} = %{$_[1]};
-#        }
-#}
-#
+    # FIXME
+    #if read_file_cached: update...
+
 ## html_escape
 def html_escape():
     raise NotImplementedError
@@ -1877,6 +1873,7 @@ def get_module_info(module, noclone=None):
     """Returns a hash containg a module name, desc and os_support"""
     if module.startswith("."): return {}
     rv = read_file_cached(os.path.join(root_directory, module, "module.info"))
+    
     if not rv:
         return {}
 
@@ -1889,7 +1886,6 @@ def get_module_info(module, noclone=None):
         rv = read_file(os.path.join(config_directory, module, "clone"))
 
     rv["dir"] = module
-    # FIXME: What is module_categories for?
     global module_categories
     if not module_categories and config_directory:
         module_categories = read_file_cached(os.path.join(config_directory, "webmin.cats"))
@@ -1900,29 +1896,55 @@ def get_module_info(module, noclone=None):
 
     return rv
 
-## get_all_module_infos([nocache])
-def get_all_module_infos():
-    raise NotImplementedError
-## Returns a vector contains the information on all modules in this webmin
-## install, including clones
-#sub get_all_module_infos
-#{
-#local (%cache, $k, $m);
-#local $cache_file = "$config_directory/module.infos.cache";
-#local @st = stat($root_directory);
-#if (!$_[0] && &read_file_cached($cache_file, \%cache) &&
-#    $cache{'lang'} eq $current_lang &&
-#    $cache{'mtime'} == $st[9]) {
-#        # Can use existing module.info cache
-#        local %mods;
-#        foreach $k (keys %cache) {
-#                if ($k =~ /^(\S+) (\S+)$/) {
-#                        $mods{$1}->{$2} = $cache{$k};
-#                        }
-#                }
-#        return map { $mods{$_} } (keys %mods) if (%mods);
-#        }
-#
+def get_all_module_infos(nocache=None):
+    """Returns a vector contains the information on all modules in this webmin
+    install, including clones, like:
+    [{"name": "mysql", "desc_sv": "MySQL-databasserver"}]
+    """
+    # Dictionary of dictionaries, during cache read
+    cache_file = os.path.join(config_directory, "module.infos.cache")
+    cache = read_file_cached(cache_file)
+    st = os.stat(root_directory)
+    all_modules = {}        
+    if not nocache and cache.get("lang") == current_lang and \
+       cache.get("mtime") == str(st.st_mtime):
+        # Can use existing module.info cache
+        print "Using cache"
+        for k in cache.keys():
+            print "k is |%s|" % k
+            try:
+                (module, variable) = k.split(None, 1)
+            except ValueError:
+                # Malformed line (or mtime=) or something like that
+                continue
+            value = cache[k]
+            try:
+                modinfo = all_modules[module]
+            except KeyError:
+                all_modules[module] = modinfo = {}
+
+            modinfo[variable] = value
+
+    else:
+        # Need to rebuild cache
+        print "Rebuilding module"
+        for entry in os.listdir(root_directory):
+            # Only deal with directories
+            if not os.path.isdir(entry): continue
+            modinfo = get_module_info(entry)
+            if not modinfo: continue
+            for variable in modinfo.keys():
+                all_modules["%s %s" % (entry, variable)] = modinfo[variable]
+
+        all_modules["lang"] = current_lang
+        all_modules["mtime"] = str(st.st_mtime)
+        if not nocache:
+            write_file(cache_file, all_modules)
+            
+    # Return list of module info dictionaries
+    return all_modules.values()
+
+
 ## Need to rebuild cache
 #%cache = ( );
 #opendir(DIR, $root_directory);
