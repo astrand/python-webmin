@@ -2738,23 +2738,23 @@ def _unserialise_variable():
 #        }
 #return $rv;
 #}
-#
-## other_groups(user)
-def other_groups():
-    raise NotImplementedError
-## Returns a list of secondary groups a user is a member of
-#sub other_groups
-#{
-#local (@rv, @g);
-#setgrent();
-#while(@g = getgrent()) {
-#        local @m = split(/\s+/, $g[3]);
-#        push(@rv, $g[2]) if (&indexof($_[0], @m) >= 0);
-#        }
-#endgrent() if ($gconfig{'os_type'} ne 'hpux');
-#return @rv;
-#}
-#
+
+def other_groups(user):
+    # FIXME check speed compared to perl function    
+    """Returns a list of secondary groups a user is a member of
+    unlike in perl, it doesn't us the webmin function "indexof"   
+    """    
+    usergrps=list()
+    # as in perl, return nothing, when user is missing (may be exception/error would the better response)
+    if not user:
+        return usergrps
+    import grp
+    allgroups=grp.getgrall()    
+    for g in allgroups:
+        if user in g[3]:
+            usergrps.append(g[2])
+    return usergrps
+
 ## date_chooser_button(dayfield, monthfield, yearfield, [form])
 def date_chooser_button():
     raise NotImplementedError
@@ -3058,18 +3058,19 @@ def switch_to_remote_user():
     try:
         remote_user_info = pwd.getpwnam(remote_user)	
     except KeyError:
-	error(" switch to user "+remote_user+" failed")
+        error(" switch to user "+remote_user+" failed")
     if os.getuid()==0 and  remote_user_info:
-#        $( = $remote_user_info[3];
-#        $) = "$remote_user_info[3] ".join(" ", $remote_user_info[3],
-#                                       &other_groups($remote_user_info[0]));
-	# Set real and effective user and group ids
-	# in perl: ($>, $<) = ( $remote_user_info[2], $remote_user_info[2] );
-	os.setregid(remote_user_info[3],remote_user_info[3])	
-	os.setreuid(remote_user_info[2],remote_user_info[2])
-	os.environ['USER'] = remote_user
-	os.environ['LOGNAME'] = remote_user 
-	os.environ['HOME'] = remote_user_info[5]
+        other_ugroups=other_groups(remote_user_info[0])
+        other_ugroups.insert(0,remote_user_info[3])
+        os.setgroups(other_ugroups)
+        # Set real and effective user and group ids
+        # in perl: ($>, $<) = ( $remote_user_info[2], $remote_user_info[2] );
+        os.setregid(remote_user_info[3],remote_user_info[3])
+        os.setreuid(remote_user_info[2],remote_user_info[2])
+        
+        os.environ['USER'] = remote_user
+        os.environ['LOGNAME'] = remote_user 
+        os.environ['HOME'] = remote_user_info[5]
 
 def create_user_config_dirs():
     """ Creates per-user config directories and sets $user_config_directory and
