@@ -1,4 +1,19 @@
+python-webmin - Python implementation of the Webmin API
+=======================================================
+python-webmin is an implementation of the Webmin API. By using
+python-webmin, you can write Webmin modules in Python instead of Perl.
 
+python-webmin is a young project and the code probably has many
+bugs. Currently, about 25 per cent of the API is implemented. This is
+sufficient to write basic modules.
+
+For up-to-date information about python-webmin, take a look at
+http://www.cendio.se/~peter/python-webmin/. 
+
+
+
+Various notes
+-------------
 Since there is nothing like $main::no_acl_check in Python, you should
 set variables in the webmin module instead. So, instead of doing:
 
