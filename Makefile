@@ -1,7 +1,7 @@
 VERSION=0.3pre
 ROOTDIR=/
-WEBMINDIR=$(ROOTDIR)/usr/libexec/webmin
-USERMINDIR=$(ROOTDIR)/usr/libexec/usermin
+WEBMINDIR=$(ROOTDIR)/opt/python-webmin
+USERMINDIR=$(ROOTDIR)/opt/python-webmin
 
 .PHONY: dist rpm
 
