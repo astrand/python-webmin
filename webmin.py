@@ -1936,7 +1936,6 @@ def get_all_module_infos(nocache=None):
     if not nocache and cache_dict.get("lang") == current_lang and \
            cache_dict.get("mtime") == str(st.st_mtime):
         # Can use existing module.info cache
-        print "Using cache"
         for k in cache_dict.keys():
             try:
                 # Try to split this key. 
@@ -1954,7 +1953,6 @@ def get_all_module_infos(nocache=None):
 
     else:
         # Need to rebuild cache
-        print "Rebuilding module"
         # Dictionary of dictionaries, during cache read
         for entry in os.listdir(root_directory):
             # Only deal with directories
