@@ -552,11 +552,11 @@ def header(title, image=None, help=None, config=None, nomodule=None, nowebmin=No
     if not link:
         link = "0000ee"
 
-    text = tconfig.get("cs_text")
-    if not text:
-        text = gconfig.get("cs_text")
-    if not text:
-        text = "000000"
+    text_color = tconfig.get("cs_text")
+    if not text_color:
+        text_color = gconfig.get("cs_text")
+    if not text_color:
+        text_color = "000000"
 
     if tconfig.has_key("bgimage"):
         bgimage = "background=" + tconfig["bgimage"]
@@ -564,7 +564,7 @@ def header(title, image=None, help=None, config=None, nomodule=None, nowebmin=No
         bgimage = ""
 
     inbody = tconfig.get("inbody", "")
-    print "<body bgcolor=#%(bgcolor)s link=#%(link)s vlink=#%(link)s text=#%(text) " \
+    print "<body bgcolor=#%(bgcolor)s link=#%(link)s vlink=#%(link)s text=#%(text_color) " \
           "%(bgimage)s %(inbody)s %(body)s" % locals()
 
     hostname = get_system_hostname()
@@ -1507,33 +1507,31 @@ def get_webmin_version():
     line = open(os.path.join(root_directory, "version")).readline()
     return line.strip()
 
-## get_module_acl([user], [module])
+def get_module_acl(user=None, module=None):
+    """Returns an array containing access control options for the given user"""
+    if user:
+        u = user
+    else:
+        u = base_remote_user
 
-def get_module_acl():
-    raise NotImplementedError
-## Returns an array containing access control options for the given user
-#sub get_module_acl
-#{
-#local %rv;
-#local $u = defined($_[0]) ? $_[0] : $base_remote_user;
-#local $m = defined($_[1]) ? $_[1] : $module_name;
-#&read_file_cached("$root_directory/$m/defaultacl", \%rv);
-#if ($gconfig{"risk_$u"} && $m) {
-#        local $rf = $gconfig{"risk_$u"}.'.risk';
-#        &read_file_cached("$root_directory/$m/$rf", \%rv);
-#
-#        local $sf = $gconfig{"skill_$u"}.'.skill';
-#        &read_file_cached("$root_directory/$m/$sf", \%rv);
-#        }
-#else {
-#        &read_file_cached("$config_directory/$m/$u.acl", \%rv);
-#        if ($remote_user ne $base_remote_user && !defined($_[0])) {
-#                &read_file_cached("$config_directory/$m/$remote_user.acl",\%rv);
-#                }
-#        }
-#return %rv;
-#}
-#
+    if module:
+        m = module
+    else:
+        m = module_name
+
+        rv = read_file_cached(os.path.join(root_directory, m, "defaultacl"))
+        if gconfig.has_key("risk_" + u) and m:
+            rf = gconfig.get("risk_" + u) + ".risk"
+            rv = read_file_cached(os.path.join(root_directory, m, rf), rv)
+            sf = gconfig.get("skill_" + u) + ".skill"
+            rv = read_file_cached(os.path.join(root_directory, m, sf), rv)
+        else:
+            rv = read_file_cached(os.path.join(config_directory, m, u + ".acl"), rv)
+            if remote_user != base_remote_user and not user:
+                rv = read_file_cached(os.path.join(config_directory, m, remote_user + ".acl"), rv)
+
+    return rv
+
 ## save_module_acl(&acl, [user], [module])
 
 def save_module_acl():
