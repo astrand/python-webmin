@@ -9,7 +9,7 @@ sys.stderr = sys.stdout
 import webmin
 import uptimelib
 
-webmin.header("Uptime demo module (Python)", config=1, nomodule=1)
+webmin.header("Uptime demo (Python)", config=1, nomodule=1)
 
 #print "Content-type: text/html\n"
 #print "XXXXXXXXXXXXXXX"
