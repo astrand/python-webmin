@@ -20,12 +20,11 @@ python-webmin, you can write Webmin modules in Python instead of Perl.
 %setup -n python-webmin
 
 %build
-python -O -c 'from compileall import *; compile_dir(".")'
+#python -O -c 'from compileall import *; compile_dir(".")'
 
 %install
 rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT/usr/libexec/webmin
-cp webmin.py $RPM_BUILD_ROOT/usr/libexec/webmin
+make install ROOTDIR=$RPM_BUILD_ROOT
 
 %clean
 rm -rf $RPM_BUILD_ROOT

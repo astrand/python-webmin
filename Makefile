@@ -1,5 +1,6 @@
 VERSION=0.1
-WEBMINDIR=/usr/libexec/webmin
+ROOTDIR=/
+WEBMINDIR=$(ROOTDIR)/usr/libexec/webmin
 
 .PHONY: dist rpm
 
@@ -7,6 +8,8 @@ all:
 
 install:
 # API module
+	mkdir -p $(WEBMINDIR)
+# FIXME: Compile 
 	install webmin.py $(WEBMINDIR)
 
 install-examples:
@@ -29,6 +32,7 @@ install-examples:
 
 dist: 
 	(cd ..; tar zcvf python-webmin/python-webmin-$(VERSION).tgz \
+	python-webmin/Makefile\
 	python-webmin/webmin.py\
 	python-webmin/python-webmin.spec\
 	python-webmin/examples/uptimepl/index.cgi\
