@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+# -*- coding: iso-8859-1 -*-
 #
 # webmin.py
 # Python implementation of web-lib.pl
