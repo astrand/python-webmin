@@ -3084,23 +3084,23 @@ def create_user_config_dirs():
     
     if not gconfig.has_key('userconfig'): return
     if not remote_user_info:
-	uinfo = pwd.getpwnam(remote_user)	
+        uinfo = pwd.getpwnam(remote_user)	
     else:
-	uinfo = remote_user_info
+        uinfo = remote_user_info
     
     if not uinfo or not uinfo[5]: return
     
     user_config_directory = os.path.join(uinfo[5],gconfig['userconfig'])
     if not os.path.exists(user_config_directory):
-	os.mkdir(user_config_directory,0755)
+        os.mkdir(user_config_directory,0755)
     if module_name:
-	user_module_config_directory = os.path.join(user_config_directory,module_name)	
-	if not os.path.exists(user_module_config_directory):
-	    os.mkdir(user_module_config_directory,0755)
-	userconfig={}	
-	read_file_cached(module_root_directory+os.sep+'defaultuconfig',userconfig)
-	read_file_cached(module_config_directory+os.sep+'uconfig',userconfig)
-	read_file_cached(user_module_config_directory+os.sep+'config',userconfig)
+        user_module_config_directory = os.path.join(user_config_directory,module_name)	
+        if not os.path.exists(user_module_config_directory):
+            os.mkdir(user_module_config_directory,0755)
+        userconfig={}	
+        read_file_cached(module_root_directory+os.sep+'defaultuconfig',userconfig)
+        read_file_cached(module_config_directory+os.sep+'uconfig',userconfig)
+        read_file_cached(user_module_config_directory+os.sep+'config',userconfig)
 
 ## filter_javascript(text)
 def filter_javascript():
