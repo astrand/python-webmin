@@ -1,21 +1,18 @@
 #!/usr/bin/env python2
 # -*-Python-*-
 
-print "Content-type: text/html\n"
-
 import sys
 sys.path.append("..")
-sys.stderr = sys.stdout
+sys.stderr = sys.stdout # Send errors to browser
 import webmin
 import uptimelib
 
 webmin.header("Uptime demo (Python)", config=1, nomodule=1)
+print "<hr>"
 
-#print "Content-type: text/html\n"
-#print "XXXXXXXXXXXXXXX"
-
-#uptimelib.somefunction()
+print "<h3>System uptime</h3>"
+uptimelib.print_uptime()
+print "<br><br>"
 
 webmin.footer([("/", "index")])
 
-print "done"
