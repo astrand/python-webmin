@@ -1911,7 +1911,6 @@ def get_all_module_infos(nocache=None):
         # Can use existing module.info cache
         print "Using cache"
         for k in cache.keys():
-            print "k is |%s|" % k
             try:
                 (module, variable) = k.split(None, 1)
             except ValueError:
