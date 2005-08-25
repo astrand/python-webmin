@@ -1,7 +1,7 @@
 Summary: A Python implementation of the Webmin API
 Name: python-webmin
 Version: 0.4
-Release: 1
+Release: 2
 Requires: webmin
 Copyright: GPL
 Group: System/Tools
