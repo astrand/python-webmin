@@ -1,6 +1,6 @@
 
 PATH=$PATH:/usr/local/bin
-for binary in python2 python2.0 python2.1 python2.2 python2.3; do
+for binary in python python2 python2.0 python2.1 python2.2 python2.3 python2.4 python2.5; do
     if $binary -c "" ; then
         $binary - <<EOF
 import sys
