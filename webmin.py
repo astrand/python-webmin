@@ -936,20 +936,38 @@ def make_date(seconds):
     # FIXME: Translation support. Make sure we use same format as web-lib.pl.
     return time.ctime(seconds)
     
+def file_chooser_button(input, choosetype, form=0, chroot="/", addmode=0,
+                        ashtml=1):
+    """Return HTML for a file chooser button, if the browser supports
+    Javascript.
 
-## file_chooser_button(input, type, [form], [chroot])
+    @input: The name of the input field in which the filename/directory choosen
+            in the chooser should appear.
 
-def file_chooser_button():
-    raise NotImplementedError
-## Return HTML for a file chooser button, if the browser supports Javascript.
-## Type values are 0 for file or directory, or 1 for directory only
-#sub file_chooser_button
-#{
-#local $form = @_ > 2 ? $_[2] : 0;
-#local $chroot = @_ > 3 ? $_[3] : "/";
-#return "<input type=button onClick='ifield = document.forms[$form].$_[0]; chooser = window.open(\"$gconfig{'webprefix'}/chooser.cgi?type=$_[1]&chroot=$chroot&file=\"+ifield.value, \"chooser\", \"toolbar=no,menubar=no,scrollbar=no,width=400,height=300\"); chooser.ifield = ifield' value=\"...\">\n";
-#}
-#
+    @choosetype: 0 if both file and directories should be selectable. 1 for
+                 directories only.
+
+    @form: The form index for the form in which the input field in @input
+           exists.
+
+    @chroot: The path the chooser should begin with.
+
+    @addmode: I don't know what this is, but the parameter exists in the
+              perl implementation, so it's implemented here as well.
+
+    @ashtml: If this is set as 0, a hash suitable as argument to a
+             Input element in HTMLgen will be returned instead of a
+             string.
+    """
+    
+    ret = {'type':'button'}
+    ret['onClick'] = "ifield = document.forms[%d].%s; chooser = window.open('%s/chooser.cgi?add=%d&type=%s&chroot=%s&file='+ifield.value, 'chooser', 'toolbar=no,menubar=no,scrollbar=no,width=400,heigh=300'); chooser.ifield = ifield" % (form, input, gconfig.get('webprefix', ''), addmode, choosetype, chroot)
+    ret['value'] = '...'
+
+    if ashtml:
+        return "<input type=\"%(type)s\" onClick=%(onClick)s value=%(value)s>\n" % ret
+    else:
+        return ret
 
 def read_acl():
     """Reads the acl file and return dictionary"""
