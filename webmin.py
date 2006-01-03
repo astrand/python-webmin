@@ -961,7 +961,7 @@ def file_chooser_button(input, choosetype, form=0, chroot="/", addmode=0,
     """
     
     ret = {'type':'button'}
-    ret['onClick'] = "ifield = document.forms[%d].%s; chooser = window.open('%s/chooser.cgi?add=%d&type=%s&chroot=%s&file='+ifield.value, 'chooser', 'toolbar=no,menubar=no,scrollbar=no,width=400,heigh=300'); chooser.ifield = ifield" % (form, input, gconfig.get('webprefix', ''), addmode, choosetype, chroot)
+    ret['onClick'] = "ifield = document.forms[%d].%s; chooser = window.open('%s/chooser.cgi?add=%d&type=%s&chroot=%s&file='+ifield.value, 'chooser', 'toolbar=no,menubar=no,scrollbar=no,width=400,heigh=300'); chooser.ifield = ifield; window.ifield = ifield" % (form, input, gconfig.get('webprefix', ''), addmode, choosetype, chroot)
     ret['value'] = '...'
 
     if ashtml:
