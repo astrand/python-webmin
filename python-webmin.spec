@@ -2,7 +2,6 @@ Summary: A Python implementation of the Webmin API
 Name: python-webmin
 Version: 0.6
 Release: 1
-Requires: webmin
 License: GPL
 Group: System/Tools
 Source: python-webmin-%{version}.tgz
