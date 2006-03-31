@@ -3,7 +3,7 @@ Name: python-webmin
 Version: 0.6
 Release: 1
 Requires: webmin
-Copyright: GPL
+License: GPL
 Group: System/Tools
 Source: python-webmin-%{version}.tgz
 URL: http://www.cendio.se/~peter/python-webmin/
