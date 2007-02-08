@@ -1,9 +1,9 @@
-# -*- coding: iso-8859-1 -*-
+# -*- coding: UTF-8 -*-
 #
 # webmin.py
 # Python implementation of web-lib.pl
 #
-# Written by Peter Åstrand <peter@cendio.se>
+# Written by Peter Ã…strand <peter@cendio.se>
 # Copyright (C) 2002 Cendio Systems AB (http://www.cendio.se)
 # 
 # This program is free software; you can redistribute it and/or modify
@@ -620,10 +620,10 @@ def header(title, image=None, help=None, config=None, nomodule=None, nowebmin=No
             
     print "</td>"
 
-    title.replace("&auml", "ä")
-    title.replace("&ouml", "ö")
-    title.replace("&aring", "å")
-    title.replace("&uuml", "ü")
+    title.replace("&auml", "Ã¤")
+    title.replace("&ouml", "Ã¶")
+    title.replace("&aring", "Ã¥")
+    title.replace("&uuml", "Ã¼")
     title.replace("&nbsp;", " ")
 
     if image:
