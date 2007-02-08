@@ -473,7 +473,7 @@ def header(title, image=None, help=None, config=None, nomodule=None, nowebmin=No
     elif lang.has_key("charset"):
         charset = lang["charset"]
     else:
-        charset = "iso-8859-1"
+        charset = "UTF-8"
 
     _PrintHeader(charset)
     _load_theme_library()
