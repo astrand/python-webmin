@@ -65,3 +65,6 @@ python-webmin-$(VERSION).tgz: dist
 
 rpm: python-webmin-$(VERSION).tgz
 	rpmbuild -ta python-webmin-$(VERSION).tgz 
+
+clean:
+	rm -f python-webmin-$(VERSION).tgz *~ 
