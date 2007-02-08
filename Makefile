@@ -45,20 +45,20 @@ install-examples:
 
 dist: 
 	(cd ..; tar zcvf python-webmin/python-webmin-$(VERSION).tgz \
-	python-webmin/setup.sh\
-	python-webmin/Makefile\
-	python-webmin/webmin.py\
-	python-webmin/python-webmin.spec\
-	python-webmin/themes/mscstyle3/theme.py \
-	python-webmin/examples/uptimepl/index.cgi\
-	python-webmin/examples/uptimepl/images/icon.gif\
-	python-webmin/examples/uptimepl/config\
-	python-webmin/examples/uptimepl/module.info\
-	python-webmin/examples/uptimepl/uptime-lib.pl\
-	python-webmin/examples/uptimepy/uptimelib.py\
-	python-webmin/examples/uptimepy/images/icon.gif\
-	python-webmin/examples/uptimepy/config\
-	python-webmin/examples/uptimepy/index.cgi\
+	python-webmin/setup.sh \
+	python-webmin/Makefile \
+	python-webmin/webmin.py \
+	python-webmin/python-webmin.spec \
+	python-webmin/themes/mscstyle3/theme.py  \
+	python-webmin/examples/uptimepl/index.cgi \
+	python-webmin/examples/uptimepl/images/icon.gif \
+	python-webmin/examples/uptimepl/config \
+	python-webmin/examples/uptimepl/module.info \
+	python-webmin/examples/uptimepl/uptime-lib.pl \
+	python-webmin/examples/uptimepy/uptimelib.py \
+	python-webmin/examples/uptimepy/images/icon.gif \
+	python-webmin/examples/uptimepy/config \
+	python-webmin/examples/uptimepy/index.cgi \
 	python-webmin/examples/uptimepy/module.info)
 
 python-webmin-$(VERSION).tgz: dist
