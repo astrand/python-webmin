@@ -351,7 +351,8 @@ def un_urlize():
 
 def include(file):
     """Read and output the named file"""
-    print open(file).read()
+    if os.path.exists(file):
+        print open(file).read()
 
 
 ## copydata
@@ -525,7 +526,8 @@ def header(title, image=None, help=None, config=None, nomodule=None, nowebmin=No
 
     print tconfig.get("headhtml", ""),
     if tconfig.has_key("headinclude"):
-        print open(os.path.join(root_directory, current_theme, tconfig["headinclude"])).read()
+        include(os.path.join(root_directory, current_theme,
+                                       tconfig["headinclude"]))
 
     print "</head>"
 
@@ -567,7 +569,8 @@ def header(title, image=None, help=None, config=None, nomodule=None, nowebmin=No
         print prebody
 
     if tconfig.get("prebodyinclude"):
-        print open(os.path.join(root_directory, current_theme, tconfig["prebodyinclude"])).read()
+        include(os.path.join(root_directory, current_theme,
+                             tconfig["prebodyinclude"]))
 
     if webmin_module.has_key("theme_prebody"):
         theme_prebody(title, image, help, config, nomodule, nowebmin,
@@ -703,8 +706,8 @@ def footer(links=[], noendbody=None):
             print postbody
 
         if tconfig.get("postbodyinclude"):
-            f = open(os.path.join(root_directory, current_theme, tconfig.get("postbodyinclude")))
-            print f.read()
+            include(os.path.join(root_directory, current_theme,
+                                 tconfig['postbodyinclude']))
 
         if webmin_module.has_key("theme_postbody"):
             theme_postbody(links, noendbody)
