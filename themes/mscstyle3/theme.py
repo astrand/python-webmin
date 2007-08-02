@@ -560,7 +560,11 @@ def theme_footer(links, noendbody=None):
 
 
 def chop_font(s):
-    if gconfig.get("texttitles"):
+    
+    a = os.path.join(os.path.join(root_directory, current_theme,
+                                  "images", "letters2", '97.gif'))
+    # Check config and make sure the image for 'a' exists
+    if gconfig.get("texttitles") or not os.path.exists(a):
         return s
 
     cont = Container()
