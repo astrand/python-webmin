@@ -33,7 +33,7 @@ import time
 import cgi
 # added for use in create_user_config_dirs()
 import pwd,os.path
- 
+
 #
 # Global variables
 #
@@ -992,7 +992,7 @@ def read_acl():
 
 def _acl_filename():
     """Returns the file containing the webmin ACL"""
-    return os.path.join(config_directory, "webmin.acl");
+    return os.path.join(config_directory, "webmin.acl")
 
 
 ## get_miniserv_config(&array)
@@ -1656,7 +1656,7 @@ def init_config():
         module_root_directory = os.path.join(root_directory, module_name)
 
     # Get the username
-    if os.environ.has_key("BASE_REMOTE_USER"):
+    if os.environ.has_key("BASE_REMOTE_USER") and '' != os.environ['BASE_REMOTE_USER']:
         u = os.environ["BASE_REMOTE_USER"]
     else:
         u = os.environ["REMOTE_USER"]
