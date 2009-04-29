@@ -35,4 +35,4 @@ rm -rf $RPM_BUILD_ROOT
 /opt/python-webmin/mscstyle3/theme.py
 
 %post
-/opt/python-webmin/setup.sh 2>/dev/null
+/opt/python-webmin/setup.sh >/dev/null
