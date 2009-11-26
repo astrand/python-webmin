@@ -14,8 +14,10 @@ sitedirs = filter(lambda s: s.endswith("site-packages") or s.endswith("dist-pack
 if len(sitedirs) < 1:
     sys.exit("Unable to find a site packages directory in sys.path")
 filename = sitedirs[0] + "/" + pthfile
-open(filename, "w").write(mod_dir + "\n")
-print "Created", filename
+want = mod_dir + "\n"
+if open(filename, "r").read() != want:
+    open(filename, "w").write(want)
+    print "Created", filename
 EOF
     fi
 done
