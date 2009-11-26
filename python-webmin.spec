@@ -1,6 +1,6 @@
 Summary: A Python implementation of the Webmin API
 Name: python-webmin
-Version: 0.13
+Version: 0.14
 Release: 1
 License: GPL
 Group: System/Tools
