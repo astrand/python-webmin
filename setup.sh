@@ -9,13 +9,13 @@ for binary in python2 python2.2 python2.3 python2.4 python2.5 python2.6 python _
         ${binary} - <<EOF
 pthfile="python-webmin.pth"
 mod_dir="/opt/python-webmin"
-import sys
+import sys, os
 sitedirs = filter(lambda s: s.endswith("site-packages") or s.endswith("dist-packages"), sys.path)
 if len(sitedirs) < 1:
     sys.exit("Unable to find a site packages directory in sys.path")
 filename = sitedirs[0] + "/" + pthfile
 want = mod_dir + "\n"
-if open(filename, "r").read() != want:
+if not os.path.exists(filename) or open(filename, "r").read() != want:
     open(filename, "w").write(want)
     print "Created", filename
 EOF
